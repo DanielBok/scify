@@ -2,26 +2,54 @@
 # -*- coding: utf-8 -*-
 
 """The setup script."""
+import os
+import sys
 
 from setuptools import setup, find_packages, Extension
 
-from Cython.Build import cythonize
+ENV = 'DEV'
+argv = sys.argv
+for e in argv:
+    if e.startswith('--env'):
+        _, ENV = e.upper().split('=')
+        argv.remove(e)
+
+try:
+    from Cython.Build import cythonize
+    from Cython.Compiler import Options
+
+    USE_CYTHON = True
+except ImportError:
+    def cythonize(ext, *args, **kwargs):
+        return ext
+
+
+    USE_CYTHON = False
+
+
+    class Options:
+        pass
 
 
 def build_extensions():
-    extensions = [
-        Extension(
-            'scify._machine',
-            ['scify/_machine.pyx'],
-        ),
-        Extension(
-            'scify.specials.debye',
-            ['scify/specials/debye.pyx'],
-        )
-    ]
+    extensions = []
+    for root, _, files in os.walk("scify"):
+        path_parts = os.path.normcase(root).split(os.sep)
+        for file in files:
+            fn, ext = os.path.splitext(file)
 
-    directives = {'language_level': '3', 'linetrace': True}
-    return cythonize(extensions, compiler_directives=directives, language='c')
+            if ext == '.pyx':
+                module_path = '.'.join([*path_parts, fn])
+                pyx_c_file_path = os.path.join(*path_parts, fn + '.pyx' if USE_CYTHON else '.c')
+                extensions.append(Extension(module_path,
+                                            [pyx_c_file_path],
+                                            language='c'))
+
+    dev = ENV == 'DEV'
+    directives = {'language_level': '3', 'linetrace': dev}
+    Options.annotate = dev
+
+    return cythonize(extensions, compiler_directives=directives)
 
 
 with open('README.rst') as readme_file:
@@ -55,7 +83,7 @@ setup(
     include_package_data=True,
     keywords='scify',
     name='scify',
-    packages=find_packages(include=['scify']),
+    packages=find_packages(include=['scify', 'scify.*']),
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/DanielBok/scify',

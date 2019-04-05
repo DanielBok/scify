@@ -25,6 +25,7 @@ endef
 export PRINT_HELP_PYSCRIPT
 
 BROWSER := python -c "$$BROWSER_PYSCRIPT"
+ENV := DEV
 
 help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
@@ -54,7 +55,7 @@ lint: ## check style with flake8
 	flake8 scify tests
 
 test: ## run tests quickly with the default Python
-	py.test
+	python -m pytest tests/
 
 test-all: ## run tests on every Python version with tox
 	tox
@@ -88,4 +89,4 @@ install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
 cython:
-	python setup.py build_ext --inplace
+	python setup.py --env=$(ENV) build_ext --inplace
