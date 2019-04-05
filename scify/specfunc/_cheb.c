@@ -3,22 +3,7 @@
 /* BEGIN: Cython Metadata
 {
     "distutils": {
-        "extra_compile_args": [
-            "-O3",
-            "-ffast-math",
-            "-march=native",
-            "-fopenmp"
-        ],
-        "extra_link_args": [
-            "-fopenmp"
-        ],
-        "include_dirs": [
-            "C:\\Miniconda3\\envs\\scify\\lib\\site-packages\\numpy\\core\\include"
-        ],
         "language": "c",
-        "libraries": [
-            "m"
-        ],
         "name": "scify.specfunc._cheb",
         "sources": [
             "scify\\specfunc\\_cheb.pyx"
@@ -1384,12 +1369,6 @@ static CYTHON_INLINE void __Pyx_ErrFetchInState(PyThreadState *tstate, PyObject 
   #define __Pyx_TraceLine(lineno, nogil, goto_error)   if ((1)); else goto_error;
 #endif
 
-/* BufferIndexError.proto */
-static void __Pyx_RaiseBufferIndexError(int axis);
-
-/* BufferIndexErrorNogil.proto */
-static void __Pyx_RaiseBufferIndexErrorNogil(int axis);
-
 /* WriteUnraisableException.proto */
 static void __Pyx_WriteUnraisable(const char *name, int clineno,
                                   int lineno, const char *filename,
@@ -1879,6 +1858,10 @@ static PyObject *__pyx_memoryview_assign_item_from_object(struct __pyx_memoryvie
 static PyObject *__pyx_memoryviewslice_convert_item_to_object(struct __pyx_memoryviewslice_obj *__pyx_v_self, char *__pyx_v_itemp); /* proto*/
 static PyObject *__pyx_memoryviewslice_assign_item_from_object(struct __pyx_memoryviewslice_obj *__pyx_v_self, char *__pyx_v_itemp, PyObject *__pyx_v_value); /* proto*/
 
+/* Module declarations from 'cython.view' */
+
+/* Module declarations from 'cython' */
+
 /* Module declarations from 'scify.specfunc._cheb' */
 static PyTypeObject *__pyx_array_type = 0;
 static PyTypeObject *__pyx_MemviewEnum_type = 0;
@@ -2184,7 +2167,9 @@ static PyObject *__pyx_tuple__25;
 static PyObject *__pyx_codeobj__19;
 /* Late includes */
 
-/* "scify/specfunc/_cheb.pyx":1
+/* "scify/specfunc/_cheb.pyx":6
+ * @cython.boundscheck(False)
+ * @cython.nonecheck(False)
  * cdef double cheb_eval(double[:] constants, double x) nogil:             # <<<<<<<<<<<<<<
  *     cdef:
  *         double d = 0.0, dd = 0.0
@@ -2200,80 +2185,65 @@ static double __pyx_f_5scify_8specfunc_5_cheb_cheb_eval(__Pyx_memviewslice __pyx
   int __pyx_t_2;
   double __pyx_t_3;
   Py_ssize_t __pyx_t_4;
-  int __pyx_t_5;
-  double __pyx_t_6;
-  Py_ssize_t __pyx_t_7;
-  __Pyx_TraceCall("cheb_eval", __pyx_f[0], 1, 1, __PYX_ERR(0, 1, __pyx_L1_error));
+  double __pyx_t_5;
+  Py_ssize_t __pyx_t_6;
+  __Pyx_TraceCall("cheb_eval", __pyx_f[0], 6, 1, __PYX_ERR(0, 6, __pyx_L1_error));
 
-  /* "scify/specfunc/_cheb.pyx":3
+  /* "scify/specfunc/_cheb.pyx":8
  * cdef double cheb_eval(double[:] constants, double x) nogil:
  *     cdef:
  *         double d = 0.0, dd = 0.0             # <<<<<<<<<<<<<<
  *         int j
  * 
  */
-  __Pyx_TraceLine(3,1,__PYX_ERR(0, 3, __pyx_L1_error))
+  __Pyx_TraceLine(8,1,__PYX_ERR(0, 8, __pyx_L1_error))
   __pyx_v_d = 0.0;
   __pyx_v_dd = 0.0;
 
-  /* "scify/specfunc/_cheb.pyx":6
+  /* "scify/specfunc/_cheb.pyx":11
  *         int j
  * 
  *     for j in range(len(constants) - 1, 0, -1):             # <<<<<<<<<<<<<<
  *         dd, d = d, 2 * x * d - dd + constants[j]
  * 
  */
-  __Pyx_TraceLine(6,1,__PYX_ERR(0, 6, __pyx_L1_error))
+  __Pyx_TraceLine(11,1,__PYX_ERR(0, 11, __pyx_L1_error))
   __pyx_t_1 = __Pyx_MemoryView_Len(__pyx_v_constants); 
   for (__pyx_t_2 = (__pyx_t_1 - 1); __pyx_t_2 > 0; __pyx_t_2-=1) {
     __pyx_v_j = __pyx_t_2;
 
-    /* "scify/specfunc/_cheb.pyx":7
+    /* "scify/specfunc/_cheb.pyx":12
  * 
  *     for j in range(len(constants) - 1, 0, -1):
  *         dd, d = d, 2 * x * d - dd + constants[j]             # <<<<<<<<<<<<<<
  * 
  *     return x * d - dd + 0.5 * constants[0]
  */
-    __Pyx_TraceLine(7,1,__PYX_ERR(0, 7, __pyx_L1_error))
+    __Pyx_TraceLine(12,1,__PYX_ERR(0, 12, __pyx_L1_error))
     __pyx_t_3 = __pyx_v_d;
     __pyx_t_4 = __pyx_v_j;
-    __pyx_t_5 = -1;
-    if (__pyx_t_4 < 0) {
-      __pyx_t_4 += __pyx_v_constants.shape[0];
-      if (unlikely(__pyx_t_4 < 0)) __pyx_t_5 = 0;
-    } else if (unlikely(__pyx_t_4 >= __pyx_v_constants.shape[0])) __pyx_t_5 = 0;
-    if (unlikely(__pyx_t_5 != -1)) {
-      __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_5);
-      __PYX_ERR(0, 7, __pyx_L1_error)
-    }
-    __pyx_t_6 = ((((2.0 * __pyx_v_x) * __pyx_v_d) - __pyx_v_dd) + (*((double *) ( /* dim=0 */ (__pyx_v_constants.data + __pyx_t_4 * __pyx_v_constants.strides[0]) ))));
+    if (__pyx_t_4 < 0) __pyx_t_4 += __pyx_v_constants.shape[0];
+    __pyx_t_5 = ((((2.0 * __pyx_v_x) * __pyx_v_d) - __pyx_v_dd) + (*((double *) ( /* dim=0 */ (__pyx_v_constants.data + __pyx_t_4 * __pyx_v_constants.strides[0]) ))));
     __pyx_v_dd = __pyx_t_3;
-    __pyx_v_d = __pyx_t_6;
+    __pyx_v_d = __pyx_t_5;
   }
 
-  /* "scify/specfunc/_cheb.pyx":9
+  /* "scify/specfunc/_cheb.pyx":14
  *         dd, d = d, 2 * x * d - dd + constants[j]
  * 
  *     return x * d - dd + 0.5 * constants[0]             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __Pyx_TraceLine(9,1,__PYX_ERR(0, 9, __pyx_L1_error))
-  __pyx_t_7 = 0;
-  __pyx_t_2 = -1;
-  if (__pyx_t_7 < 0) {
-    __pyx_t_7 += __pyx_v_constants.shape[0];
-    if (unlikely(__pyx_t_7 < 0)) __pyx_t_2 = 0;
-  } else if (unlikely(__pyx_t_7 >= __pyx_v_constants.shape[0])) __pyx_t_2 = 0;
-  if (unlikely(__pyx_t_2 != -1)) {
-    __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_2);
-    __PYX_ERR(0, 9, __pyx_L1_error)
-  }
-  __pyx_r = (((__pyx_v_x * __pyx_v_d) - __pyx_v_dd) + (0.5 * (*((double *) ( /* dim=0 */ (__pyx_v_constants.data + __pyx_t_7 * __pyx_v_constants.strides[0]) )))));
+  __Pyx_TraceLine(14,1,__PYX_ERR(0, 14, __pyx_L1_error))
+  __pyx_t_6 = 0;
+  if (__pyx_t_6 < 0) __pyx_t_6 += __pyx_v_constants.shape[0];
+  __pyx_r = (((__pyx_v_x * __pyx_v_d) - __pyx_v_dd) + (0.5 * (*((double *) ( /* dim=0 */ (__pyx_v_constants.data + __pyx_t_6 * __pyx_v_constants.strides[0]) )))));
   goto __pyx_L0;
 
-  /* "scify/specfunc/_cheb.pyx":1
+  /* "scify/specfunc/_cheb.pyx":6
+ * @cython.boundscheck(False)
+ * @cython.nonecheck(False)
  * cdef double cheb_eval(double[:] constants, double x) nogil:             # <<<<<<<<<<<<<<
  *     cdef:
  *         double d = 0.0, dd = 0.0
@@ -2288,9 +2258,9 @@ static double __pyx_f_5scify_8specfunc_5_cheb_cheb_eval(__Pyx_memviewslice __pyx
   return __pyx_r;
 }
 
-/* "scify/specfunc/_cheb.pyx":12
- * 
- * 
+/* "scify/specfunc/_cheb.pyx":19
+ * @cython.boundscheck(False)
+ * @cython.nonecheck(False)
  * cdef double cheb_eval_(double* constants, double x, int order) nogil:             # <<<<<<<<<<<<<<
  *     cdef:
  *         double d = 0.0, dd = 0.0
@@ -2305,56 +2275,56 @@ static double __pyx_f_5scify_8specfunc_5_cheb_cheb_eval_(double *__pyx_v_constan
   int __pyx_t_1;
   double __pyx_t_2;
   double __pyx_t_3;
-  __Pyx_TraceCall("cheb_eval_", __pyx_f[0], 12, 1, __PYX_ERR(0, 12, __pyx_L1_error));
+  __Pyx_TraceCall("cheb_eval_", __pyx_f[0], 19, 1, __PYX_ERR(0, 19, __pyx_L1_error));
 
-  /* "scify/specfunc/_cheb.pyx":14
+  /* "scify/specfunc/_cheb.pyx":21
  * cdef double cheb_eval_(double* constants, double x, int order) nogil:
  *     cdef:
  *         double d = 0.0, dd = 0.0             # <<<<<<<<<<<<<<
  *         int j
  * 
  */
-  __Pyx_TraceLine(14,1,__PYX_ERR(0, 14, __pyx_L1_error))
+  __Pyx_TraceLine(21,1,__PYX_ERR(0, 21, __pyx_L1_error))
   __pyx_v_d = 0.0;
   __pyx_v_dd = 0.0;
 
-  /* "scify/specfunc/_cheb.pyx":17
+  /* "scify/specfunc/_cheb.pyx":24
  *         int j
  * 
  *     for j in range(order - 1, 0, -1):             # <<<<<<<<<<<<<<
  *         dd, d = d, 2 * x * d - dd + constants[j]
  * 
  */
-  __Pyx_TraceLine(17,1,__PYX_ERR(0, 17, __pyx_L1_error))
+  __Pyx_TraceLine(24,1,__PYX_ERR(0, 24, __pyx_L1_error))
   for (__pyx_t_1 = (__pyx_v_order - 1); __pyx_t_1 > 0; __pyx_t_1-=1) {
     __pyx_v_j = __pyx_t_1;
 
-    /* "scify/specfunc/_cheb.pyx":18
+    /* "scify/specfunc/_cheb.pyx":25
  * 
  *     for j in range(order - 1, 0, -1):
  *         dd, d = d, 2 * x * d - dd + constants[j]             # <<<<<<<<<<<<<<
  * 
  *     return x * d - dd + 0.5 * constants[0]
  */
-    __Pyx_TraceLine(18,1,__PYX_ERR(0, 18, __pyx_L1_error))
+    __Pyx_TraceLine(25,1,__PYX_ERR(0, 25, __pyx_L1_error))
     __pyx_t_2 = __pyx_v_d;
     __pyx_t_3 = ((((2.0 * __pyx_v_x) * __pyx_v_d) - __pyx_v_dd) + (__pyx_v_constants[__pyx_v_j]));
     __pyx_v_dd = __pyx_t_2;
     __pyx_v_d = __pyx_t_3;
   }
 
-  /* "scify/specfunc/_cheb.pyx":20
+  /* "scify/specfunc/_cheb.pyx":27
  *         dd, d = d, 2 * x * d - dd + constants[j]
  * 
  *     return x * d - dd + 0.5 * constants[0]             # <<<<<<<<<<<<<<
  */
-  __Pyx_TraceLine(20,1,__PYX_ERR(0, 20, __pyx_L1_error))
+  __Pyx_TraceLine(27,1,__PYX_ERR(0, 27, __pyx_L1_error))
   __pyx_r = (((__pyx_v_x * __pyx_v_d) - __pyx_v_dd) + (0.5 * (__pyx_v_constants[0])));
   goto __pyx_L0;
 
-  /* "scify/specfunc/_cheb.pyx":12
- * 
- * 
+  /* "scify/specfunc/_cheb.pyx":19
+ * @cython.boundscheck(False)
+ * @cython.nonecheck(False)
  * cdef double cheb_eval_(double* constants, double x, int order) nogil:             # <<<<<<<<<<<<<<
  *     cdef:
  *         double d = 0.0, dd = 0.0
@@ -16881,7 +16851,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 6, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 11, __pyx_L1_error)
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) __PYX_ERR(1, 133, __pyx_L1_error)
   __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(1, 148, __pyx_L1_error)
   __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) __PYX_ERR(1, 151, __pyx_L1_error)
@@ -17494,9 +17464,9 @@ if (!__Pyx_RefNanny) {
   __Pyx_TraceCall("__Pyx_PyMODINIT_FUNC PyInit__cheb(void)", __pyx_f[0], 1, 0, __PYX_ERR(0, 1, __pyx_L1_error));
 
   /* "scify/specfunc/_cheb.pyx":1
- * cdef double cheb_eval(double[:] constants, double x) nogil:             # <<<<<<<<<<<<<<
- *     cdef:
- *         double d = 0.0, dd = 0.0
+ * cimport cython             # <<<<<<<<<<<<<<
+ * 
+ * 
  */
   __Pyx_TraceLine(1,0,__PYX_ERR(0, 1, __pyx_L1_error))
   __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
@@ -17855,23 +17825,6 @@ bad:
     return py_code;
 }
 #endif
-
-/* BufferIndexError */
-static void __Pyx_RaiseBufferIndexError(int axis) {
-  PyErr_Format(PyExc_IndexError,
-     "Out of bounds on buffer access (axis %d)", axis);
-}
-
-/* BufferIndexErrorNogil */
-static void __Pyx_RaiseBufferIndexErrorNogil(int axis) {
-    #ifdef WITH_THREAD
-    PyGILState_STATE gilstate = PyGILState_Ensure();
-    #endif
-    __Pyx_RaiseBufferIndexError(axis);
-    #ifdef WITH_THREAD
-    PyGILState_Release(gilstate);
-    #endif
-}
 
 /* WriteUnraisableException */
 static void __Pyx_WriteUnraisable(const char *name, CYTHON_UNUSED int clineno,

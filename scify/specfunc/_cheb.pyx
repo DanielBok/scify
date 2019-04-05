@@ -1,3 +1,8 @@
+cimport cython
+
+
+@cython.boundscheck(False)
+@cython.nonecheck(False)
 cdef double cheb_eval(double[:] constants, double x) nogil:
     cdef:
         double d = 0.0, dd = 0.0
@@ -9,6 +14,8 @@ cdef double cheb_eval(double[:] constants, double x) nogil:
     return x * d - dd + 0.5 * constants[0]
 
 
+@cython.boundscheck(False)
+@cython.nonecheck(False)
 cdef double cheb_eval_(double* constants, double x, int order) nogil:
     cdef:
         double d = 0.0, dd = 0.0
