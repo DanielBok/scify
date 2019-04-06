@@ -72,3 +72,5 @@ cdef:
     double M_LN2
     double M_LNPI
     double M_EULER
+
+    double sign(double) nogil

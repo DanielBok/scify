@@ -1,3 +1,6 @@
+cimport cython
+
+
 cdef:
     double DBL_EPSILON = 2.220446049250313e-16
     double SQRT_DBL_EPSILON = 1.4901161193847656e-08
@@ -72,3 +75,7 @@ cdef:
     double M_LN2 = 0.69314718055994530941723212146
     double M_LNPI = 1.14472988584940017414342735135
     double M_EULER = 0.57721566490153286060651209008
+
+
+cdef double sign(double x) nogil:
+    return 1 if x >= 0 else -1
