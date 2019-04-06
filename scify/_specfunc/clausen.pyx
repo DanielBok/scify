@@ -1,7 +1,7 @@
-from libc cimport math as cm
-
 cimport cython
 from cython.parallel import prange
+from libc cimport math as cm
+
 import numpy as np
 
 from scify cimport _machine as m
@@ -50,10 +50,7 @@ def clausen(x):
 
 cdef double _clausen(double x) nogil:
     cdef:
-        double x_cut = m.M_PI * m.DBL_EPSILON
-        double sgn = 1.0
-        double t
-        double*constants = [
+        double* constants = [
             2.142694363766688447e+00,
             0.723324281221257925e-01,
             0.101642475021151164e-02,
@@ -70,6 +67,9 @@ cdef double _clausen(double x) nogil:
             0.68e-17,
             0.4e-18
         ]
+        double x_cut = m.M_PI * m.DBL_EPSILON
+        double sgn = 1.0
+        double t
 
     if x < 0:
         x = -x
