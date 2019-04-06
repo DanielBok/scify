@@ -1,6 +1,6 @@
 .idea/
 
-# Cython annotation files
+# Cython artifacts
 *.html
 
 # Byte-compiled / optimized / DLL files
