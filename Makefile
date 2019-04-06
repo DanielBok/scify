@@ -1,4 +1,4 @@
-.PHONY: clean clean-test clean-pyc clean-build cython docs help
+.PHONY: clean clean-test clean-pyc clean-build clean-cython cython docs help
 .DEFAULT_GOAL := help
 
 define BROWSER_PYSCRIPT
@@ -26,11 +26,12 @@ export PRINT_HELP_PYSCRIPT
 
 BROWSER := python -c "$$BROWSER_PYSCRIPT"
 ENV := DEV
+COMPILER = msvc
 
 help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
-clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
+clean: clean-build clean-pyc clean-cython clean-test ## remove all build, test, coverage and Python artifacts
 
 clean-build: ## remove build artifacts
 	rm -fr build/
@@ -38,6 +39,10 @@ clean-build: ## remove build artifacts
 	rm -fr .eggs/
 	find . -name '*.egg-info' -exec rm -fr {} +
 	find . -name '*.egg' -exec rm -f {} +
+
+clean-cython:  # remove cython build artifacts
+	find . -name "*.pyd" -exec rm {} +
+	find scify | grep scify\.*.html | xargs -r rm
 
 clean-pyc: ## remove Python file artifacts
 	find . -name '*.pyc' -exec rm -f {} +
@@ -89,4 +94,4 @@ install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
 cython:
-	python setup.py --env=$(ENV) build_ext --inplace
+	python setup.py --env=$(ENV) build_ext --compiler=$(COMPILER) --inplace
