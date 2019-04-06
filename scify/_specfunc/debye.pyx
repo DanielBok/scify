@@ -5,10 +5,11 @@ from cython.parallel import prange
 import numpy as np
 
 from scify cimport _machine as m
-from scify.specfunc._cheb cimport cheb_eval_
+from .cheb cimport cheb_eval_
 
 
 @cython.boundscheck(False)
+@cython.wraparound(False)
 def debye_1(x):
     cdef:
         double[::1] arr
@@ -75,6 +76,7 @@ cdef double _debye_1(double x) nogil:
 
 
 @cython.boundscheck(False)
+@cython.wraparound(False)
 def debye_2(x):
     cdef:
         double[::1] arr
@@ -146,6 +148,7 @@ cdef double _debye_2(double x) nogil:
 
 
 @cython.boundscheck(False)
+@cython.wraparound(False)
 def debye_3(x):
     cdef:
         double[::1] arr
@@ -215,6 +218,7 @@ cdef double _debye_3(double x) nogil:
 
 
 @cython.boundscheck(False)
+@cython.wraparound(False)
 def debye_4(x):
     cdef:
         double[::1] arr
@@ -283,6 +287,7 @@ cdef double _debye_4(double x) nogil:
 
 
 @cython.boundscheck(False)
+@cython.wraparound(False)
 def debye_5(x):
     cdef:
         double[::1] arr
@@ -350,6 +355,7 @@ cdef double _debye_5(double x) nogil:
 
 
 @cython.boundscheck(False)
+@cython.wraparound(False)
 def debye_6(x):
     cdef:
         double[::1] arr

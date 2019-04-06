@@ -1,4 +1,4 @@
-import scify.specfunc._debye as d
+from .._specfunc import debye as d
 
 __all__ = ['debye_n', 'debye_1', 'debye_2', 'debye_3', 'debye_4', 'debye_5', 'debye_6']
 

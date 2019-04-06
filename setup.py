@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""The setup script."""
 import os
 import sys
 
@@ -14,11 +10,15 @@ for e in argv:
         _, ENV = e.upper().split('=')
         argv.remove(e)
 
+IS_DEV_MODE = ENV == 'DEV'
+
 try:
     from Cython.Build import cythonize
     from Cython.Compiler import Options
 
     USE_CYTHON = True
+    Options.annotate = IS_DEV_MODE
+
 except ImportError:
     def cythonize(ext, *args, **kwargs):
         return ext
@@ -40,15 +40,12 @@ def build_extensions():
 
             if ext == '.pyx':
                 module_path = '.'.join([*path_parts, fn])
-                pyx_c_file_path = os.path.join(*path_parts, fn + '.pyx' if USE_CYTHON else '.c')
+                pyx_c_file_path = os.path.join(*path_parts, fn + ('.pyx' if USE_CYTHON else '.c'))
                 extensions.append(Extension(module_path,
                                             [pyx_c_file_path],
                                             language='c'))
 
-    dev = ENV == 'DEV'
-    directives = {'language_level': '3', 'linetrace': dev}
-    Options.annotate = dev
-
+    directives = {'language_level': '3', 'linetrace': IS_DEV_MODE}
     return cythonize(extensions, compiler_directives=directives)
 
 
