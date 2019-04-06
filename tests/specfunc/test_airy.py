@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal
 
-from scify.specfunc.airy import airy_Ai
+from scify.specfunc.airy import airy_Ai, airy_Ai_scaled
 
 
 @pytest.mark.parametrize('x, exp, dp', [
@@ -21,11 +21,36 @@ from scify.specfunc.airy import airy_Ai
                                0.0470362168668458,
                                0.0256104044217732,
                                0.0132892825296715,
-                               0.00659113935746072]
-     , 6),
+                               0.00659113935746072], 6),
     (-2.35, -0.00833875172280131, 6),
     (0.42, 0.250046304012225, 6),
     (3.69, 0.00178056619302446, 6)
 ])
 def test_airy_Ai(x, exp, dp):
     assert_almost_equal(airy_Ai(x), exp, dp)
+
+
+@pytest.mark.parametrize('x, exp, dp', [
+    (np.arange(-3, 3.1, 0.4), [-0.378814293677658,
+                               -0.178502428936404,
+                               0.096145378007669,
+                               0.340761559124214,
+                               0.491700181061291,
+                               0.535560883292352,
+                               0.49484952543115,
+                               0.406284187444801,
+                               0.322363321657436,
+                               0.286000528176208,
+                               0.26351364474914,
+                               0.247526600878073,
+                               0.235306006032376,
+                               0.225521819439379,
+                               0.217429335818205,
+                               0.210572042785977], 6),
+    (-2.35, -0.00833875172280131, 6),
+    (-0.42, 0.458689175879337, 6),
+    (0.42, 0.299797382951602, 6),
+    (3.69, 0.200825643616989, 6)
+])
+def test_airy_scaled(x, exp, dp):
+    assert_almost_equal(airy_Ai_scaled(x), exp, dp)

@@ -305,3 +305,69 @@ cdef double airy_aie(double x) nogil:
         double z = 2 / (x * sqx) - 1
 
     return (0.28125 + cheb_eval_mode(constant, z, 36, -1, 1)) / cm.sqrt(sqx)
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def airy_Ai_scaled(x):
+    r"""
+    Computes a scaled version of the Airy function of the first kind.
+
+    This is defined as
+
+    .. math::
+
+        Ai_s = \left.
+        \begin{cases}
+            (1/\pi) \int_0^\infty \cos(\t^3/3 + xt) dt, & x < 0 \\
+            \exp^{1.5 x^1.5} (1/\pi) \int_0^\infty \cos(\t^3/3 + xt) dt, & x \geq 0
+        \end{cases}
+        \right}
+
+    For more information, checkout the article on `Wikipedia <https://en.wikipedia.org/wiki/Airy_function>`_
+
+    Parameters
+    ----------
+    x: {array_like, scalar}
+        Numerical vector
+
+    Returns
+    -------
+    arraylike or scalar
+        Values as defined by the Airy function
+    """
+    cdef:
+        double[:] arr
+        int i
+        size_t n
+
+    if np.isscalar(x):
+        return _airy_Ai_scaled(x)
+
+    arr = np.ravel(x)
+    n = len(arr)
+    for i in prange(n, nogil=True):
+        arr[i] = _airy_Ai_scaled(arr[i])
+
+    return np.reshape(arr, np.shape(x))
+
+
+@cython.cdivision(True)
+@cython.nonecheck(False)
+cdef double _airy_Ai_scaled(double x) nogil:
+    cdef:
+        double mod, theta, z, val, scale
+
+    if x < -1:
+        mod, theta = airy_mod_phase(x)
+        return mod * cos_err(theta)
+    elif x < 1:
+        z = x ** 3
+        mod = cheb_eval_mode(aif_cs, z, 9, -1, 1)
+        theta = cheb_eval_mode(aig_cs, z, 8, -1, 1)
+        val = 0.375 + (mod - x * (0.25 + theta))
+
+        if x > 0:
+            return val * cm.exp(2. / 3 * cm.sqrt(z))
+        return val
+    else:
+        return airy_aie(x)
