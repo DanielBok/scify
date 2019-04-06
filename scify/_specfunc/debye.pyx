@@ -1,6 +1,5 @@
-from libc cimport math as cm
-
 cimport cython
+from libc cimport math as cm
 from cython.parallel import prange
 import numpy as np
 
