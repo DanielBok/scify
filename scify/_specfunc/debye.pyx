@@ -4,7 +4,7 @@ from cython.parallel import prange
 import numpy as np
 
 from scify cimport _machine as m
-from .cheb cimport cheb_eval_
+from .cheb cimport cheb_eval
 
 
 @cython.boundscheck(False)
@@ -58,7 +58,7 @@ cdef double _debye_1(double x) nogil:
     elif x < 2 * m.SQRT_DBL_EPSILON:
         return 1 - 0.25 * x + x ** 2 / 36
     elif x <= 4:
-        return cheb_eval_(constants, x * x / 8 - 1, order) - 0.25 * x
+        return cheb_eval(constants, x * x / 8 - 1, order) - 0.25 * x
     elif x <= -(m.M_LN2 + m.LOG_DBL_EPSILON):
         nexp = <int> cm.floor(xcut / x)
         ex = cm.exp(-x)
@@ -126,7 +126,7 @@ cdef double _debye_2(double x) nogil:
     elif x < 2 * m.M_SQRT2 * m.SQRT_DBL_EPSILON:
         return 1 - x / 3 + x ** 2 / 24
     elif x <= 4:
-        return cheb_eval_(constants, x * x / 8 - 1, order) - x / 3
+        return cheb_eval(constants, x * x / 8 - 1, order) - x / 3
     elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
         nexp = <int> cm.floor(xcut / x)
         ex = cm.exp(-x)
@@ -198,7 +198,7 @@ cdef double _debye_3(double x) nogil:
     elif x < 2.0 * m.M_SQRT2 * m.SQRT_DBL_EPSILON:
         return 1 - 3 * x / 8 + x ** 2 / 20
     elif x <= 4:
-        return cheb_eval_(constants, x * x / 8 - 1, 17) - 0.375 * x
+        return cheb_eval(constants, x * x / 8 - 1, 17) - 0.375 * x
     elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
         nexp = <int>cm.floor(xcut / x)
         ex = cm.exp(-x)
@@ -267,7 +267,7 @@ cdef double _debye_4(double x) nogil:
     elif x < 2.0 * m.M_SQRT2 * m.SQRT_DBL_EPSILON:
         return 1 - 2 * x / 5 + x ** 2 / 18
     elif x <= 4:
-        return cheb_eval_(constants, x * x / 8 - 1, order) - 0.4 * x
+        return cheb_eval(constants, x * x / 8 - 1, order) - 0.4 * x
     elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
         nexp = <int> cm.floor(xcut / x)
         ex = cm.exp(-x)
@@ -336,7 +336,7 @@ cdef double _debye_5(double x) nogil:
     elif x < 2.0 * m.M_SQRT2 * m.SQRT_DBL_EPSILON:
         return 1 - 5 * x / 12 + 5 * x ** 2 / 84
     elif x <= 4:
-        return cheb_eval_(constants, x * x / 8 - 1, order) - 5 * x / 12
+        return cheb_eval(constants, x * x / 8 - 1, order) - 5 * x / 12
     elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
         nexp = <int> cm.floor(xcut / x)
         ex = cm.exp(-x)
@@ -404,7 +404,7 @@ cdef double _debye_6(double x) nogil:
     elif x < 2.0 * m.M_SQRT2 * m.SQRT_DBL_EPSILON:
         return 1 - 3 * x / 7 + x ** 2 / 16
     elif x <= 4:
-        return cheb_eval_(constants, x * x / 8 - 1, order) - 3 * x / 7
+        return cheb_eval(constants, x * x / 8 - 1, order) - 3 * x / 7
     elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
         nexp = <int> cm.floor(xcut / x)
         ex = cm.exp(-x)

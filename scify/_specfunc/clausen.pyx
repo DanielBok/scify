@@ -5,7 +5,7 @@ from cython.parallel import prange
 import numpy as np
 
 from scify cimport _machine as m
-from .cheb cimport cheb_eval_
+from .cheb cimport cheb_eval
 from .trig cimport angle_restrict_pos_err
 
 
@@ -86,4 +86,4 @@ cdef double _clausen(double x) nogil:
     elif x < x_cut:
         return x * (1.0 - cm.log(x)) * sgn
     else:
-        return x * (cheb_eval_(constants, 2 * (x * x / (m.M_PI ** 2) - 0.5), 15) - cm.log(x)) * sgn
+        return x * (cheb_eval(constants, 2 * (x * x / (m.M_PI ** 2) - 0.5), 15) - cm.log(x)) * sgn
