@@ -93,11 +93,11 @@ cdef double sin_err(double x) nogil:
     cdef:
         double abs_x = cm.fabs(x)
         double sgn_x = m.sign(x)
-        double val, t, y, z, sgn = 1
+        double val, t, y, z
         int octant
 
     if abs_x < m.ROOT4_DBL_EPSILON:
-        return x * (1 - x * x / 6)
+        return x * (1 - x * x / 6.)
 
     y = cm.floor(abs_x / (0.25 * PI))
     octant = <int>(y - cm.ldexp(cm.floor(cm.ldexp(y, -3)), 3))
@@ -109,7 +109,7 @@ cdef double sin_err(double x) nogil:
 
     if octant > 3:
         octant -= 4
-        sgn *= -1
+        sgn_x *= -1
 
     z = ((abs_x - y * 7.85398125648498535156e-1) - y * 3.77489470793079817668e-8) - y * 2.69515142907905952645e-15
 

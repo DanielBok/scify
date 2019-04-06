@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal
 
-from scify.specfunc.airy import airy_Ai, airy_Ai_scaled
+from scify.specfunc.airy import airy_Ai, airy_Ai_scaled, airy_Bi, airy_Bi_scaled
 
 
 @pytest.mark.parametrize('x, exp, dp', [
@@ -52,5 +52,58 @@ def test_airy_Ai(x, exp, dp):
     (0.42, 0.299797382951602, 6),
     (3.69, 0.200825643616989, 6)
 ])
-def test_airy_scaled(x, exp, dp):
+def test_airy_Ai_scaled(x, exp, dp):
     assert_almost_equal(airy_Ai_scaled(x), exp, dp)
+
+
+@pytest.mark.parametrize('x, exp, dp', [
+    (np.arange(-3, 3.1, 0.4), [-0.198289626374927,
+                               -0.405008278130034,
+                               -0.450360984168208,
+                               -0.341405831830135,
+                               -0.134724060952795,
+                               0.103997389496945,
+                               0.32879184076087,
+                               0.524509032818486,
+                               0.705464202918661,
+                               0.911063341694941,
+                               1.20742359495287,
+                               1.70365971153868,
+                               2.59586935674391,
+                               4.26703658176665,
+                               7.51008769808228,
+                               14.0373289637302], 6),
+    (-2.35, -0.453321204001324, 6),
+    (0.42, 0.811984122611258, 6),
+    (1.77, 2.50837042480759, 6),
+    (3.69, 46.6905771821292, 6)
+])
+def test_airy_Bi(x, exp, dp):
+    assert_almost_equal(airy_Bi(x), exp, dp)
+
+
+@pytest.mark.parametrize('x, exp, dp', [
+    (np.arange(-3, 3.1, 0.4), [-0.198289626374927,
+                               -0.405008278130034,
+                               -0.450360984168208,
+                               -0.341405831830135,
+                               -0.134724060952795,
+                               0.103997389496945,
+                               0.32879184076087,
+                               0.524509032818486,
+                               0.664628043168643,
+                               0.668324448519242,
+                               0.619911943572679,
+                               0.564646061371301,
+                               0.518898246927902,
+                               0.484567448121886,
+                               0.459016612762283,
+                               0.439384023550096]
+     , 6),
+    (-2.35, -0.453321204001324, 6),
+    (0.42, 0.677236161225369, 6),
+    (1.77, 0.521912888689588, 6),
+    (3.69, 0.413969360515798, 6)
+])
+def test_airy_Bi_scaled(x, exp, dp):
+    assert_almost_equal(airy_Bi_scaled(x), exp, dp)

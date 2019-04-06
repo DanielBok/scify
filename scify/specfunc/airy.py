@@ -18,7 +18,7 @@ def airy_Ai(x):
 
     Returns
     -------
-    arraylike or scalar
+    array_like or scalar
         Values from the Airy function
     """
     return a.airy_Ai(x)
@@ -48,7 +48,60 @@ def airy_Ai_scaled(x):
 
     Returns
     -------
-    arraylike or scalar
-        Values as defined by the Airy function
+    array_like or scalar
+        Values from the Airy function
     """
     return a.airy_Ai_scaled(x)
+
+
+def airy_Bi(x):
+    r"""
+    Computes the Airy function of the second kind. This is defined as
+
+    .. math::
+
+        Bi(x) = (1/\pi) \int_0^\infty \left[ e^{-(t^3/3) + xt} + \sin((t^3/3) + xt) \right] dt
+
+    For more information, checkout the article on `Wikipedia <https://en.wikipedia.org/wiki/Airy_function>`_
+
+    Parameters
+    ----------
+    x: {array_like, scalar}
+        Numerical vector
+
+    Returns
+    -------
+    array_like or scalar
+        Values from the Airy function
+    """
+    return a.airy_Bi(x)
+
+
+def airy_Bi_scaled(x):
+    r"""
+    Computes a scaled version of the Airy function of the second kind.
+
+    This is defined as
+
+    .. math::
+
+        Bi_s = \left.
+        \begin{cases}
+            (1/\pi) \int_0^\infty \left[ e^{-(t^3/3) + xt} + \sin((t^3/3) + xt) \right] dt, & x < 0 \\
+            \exp^{1.5 x^1.5} (1/\pi) \int_0^\infty \left[ e^{-(t^3/3) + xt} + \sin((t^3/3) + xt) \right] dt, & x \geq 0
+        \end{cases}
+        \right}
+
+    For more information, checkout the article on `Wikipedia <https://en.wikipedia.org/wiki/Airy_function>`_
+
+    Parameters
+    ----------
+    x: {array_like, scalar}
+        Numerical vector
+
+    Returns
+    -------
+    array_like or scalar
+        Values from the Airy function
+    """
+    return a.airy_Bi_scaled(x)
