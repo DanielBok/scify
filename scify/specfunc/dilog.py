@@ -18,7 +18,7 @@ def dilog(x):
 
     Returns
     -------
-    {array_like, scalar}
+    array_like or scalar
         Real Dilog output
     """
     return d.dilog(x)
@@ -38,7 +38,7 @@ def dilog_complex(r, theta=None):
 
     Returns
     -------
-    {array_like, scalar}
+    array_like or scalar
         Complex Dilog output
     """
     if theta is None:

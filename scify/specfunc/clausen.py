@@ -19,7 +19,7 @@ def clausen(x):
 
     Returns
     -------
-    {array_like, scalar}
+    array_like or scalar
         Clausen output
     """
     return c.clausen(x)

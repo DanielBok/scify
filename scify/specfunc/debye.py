@@ -23,7 +23,7 @@ def debye_n(x, order=1):
 
     Returns
     -------
-    {scalar or ndarray}
+    array_like or scalar
         Value of the Debye function
     """
     assert 1 <= order <= 6, "Debye order must be between [1, 6]"
@@ -56,7 +56,7 @@ def debye_1(x):
 
     Returns
     -------
-    {scalar or ndarray}
+    array_like or scalar
         Value of the Debye function
     """
     return d.debye_1(x)
@@ -76,7 +76,7 @@ def debye_2(x):
 
     Returns
     -------
-    {scalar or ndarray}
+    array_like or scalar
         Value of the Debye function
     """
     return d.debye_2(x)
@@ -97,7 +97,7 @@ def debye_3(x):
 
     Returns
     -------
-    {scalar or ndarray}
+    array_like or scalar
         Value of the Debye function
     """
     return d.debye_3(x)
@@ -118,7 +118,7 @@ def debye_4(x):
 
     Returns
     -------
-    {scalar or ndarray}
+    array_like or scalar
         Value of the Debye function
     """
     return d.debye_4(x)
@@ -139,7 +139,7 @@ def debye_5(x):  # pragma: no cover
 
     Returns
     -------
-    {scalar or ndarray}
+    array_like or scalar
         Value of the Debye function
     """
     return d.debye_5(x)
@@ -160,7 +160,7 @@ def debye_6(x):  # pragma: no cover
 
     Returns
     -------
-    {scalar or ndarray}
+    array_like or scalar
         Value of the Debye function
     """
     return d.debye_6(x)
