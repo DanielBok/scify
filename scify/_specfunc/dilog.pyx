@@ -17,13 +17,29 @@ def dilog(x, bint threaded):
         return _dilog(x)
 
     cdef:
-        cnp.ndarray[cnp.float64_t, ndim=1] arr = np.ravel(x)
-        long i, n = x.size
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        int n = arr.size
 
-    for i in range(n):
-        arr[i] = _dilog(arr[i])
+    if threaded:
+        dilog_p(arr, n)
+    else:
+        dilog_s(arr, n)
 
     return arr.reshape(np.shape(x))
+
+
+cdef void dilog_p(double[::1] x, int size) nogil:
+    """Parallel"""
+    cdef int i
+    for i in prange(size, nogil=True):
+        x[i] = _dilog(x[i])
+
+
+cdef void dilog_s(double[::1] x, int size) nogil:
+    """Single Thread"""
+    cdef int i
+    for i in range(size):
+        x[i] = _dilog(x[i])
 
 
 cdef double _dilog(double x) nogil:
@@ -131,34 +147,34 @@ cdef double dilog_series_2(double x) nogil:
 def dilog_complex(r, theta, bint threaded):
     assert np.shape(r) == np.shape(theta), "Radius of complex vector must have same shape as the angled part"
 
-    Parameters
-    ----------
-    r: {array_like, scalar}
-        The modulus of the complex vector or scalar
-    theta: {array_like, scalar}
-        The argument of the complex vector or scalar
-
-    Returns
-    -------
-    {array_like, scalar}
-        Complex Dilog output
-    """
     if np.isscalar(r) and np.isscalar(theta):
         return complex(*_dilog_complex(r, theta))
 
-    cdef tuple shape = np.shape(r)
-    assert shape == np.shape(theta), "Radius of complex vector must have same shape as the angled part"
-
     cdef:
-        cnp.ndarray[cnp.float64_t, ndim=1] r_vec = np.ravel(r)
-        cnp.ndarray[cnp.float64_t, ndim=1] theta_vec = np.ravel(theta)
-        long i, n = len(r_vec)
+        cnp.ndarray[cnp.npy_float64, ndim=1] r_vec = np.ravel(r)
+        cnp.ndarray[cnp.npy_float64, ndim=1] theta_vec = np.ravel(theta)
+        int n = r_vec.size
 
-    for i in prange(n, nogil=True):
-        r_vec[i], theta_vec[i] = _dilog_complex(r_vec[i], theta_vec[i])
+    if threaded:
+        dilog_complex_p(r_vec, theta_vec, n)
+    else:
+        dilog_complex_s(r_vec, theta_vec, n)
 
-    return (r_vec + 1j * theta_vec).reshape(shape)
+    return (np.asarray(r_vec) + 1j * np.asarray(theta_vec)).reshape(np.shape(r))
 
+
+cdef void dilog_complex_p(double[::1] r, double[::1] theta, int size) nogil:
+    """Parallel"""
+    cdef int i
+    for i in prange(size, nogil=True):
+        r[i], theta[i] = _dilog_complex(r[i], theta[i])
+
+
+cdef void dilog_complex_s(double[::1] r, double[::1] theta, int size) nogil:
+    """Single Thread"""
+    cdef int i
+    for i in range(size):
+        r[i], theta[i] = _dilog_complex(r[i], theta[i])
 
 
 cdef (double, double) _dilog_complex(double r, double theta) nogil:

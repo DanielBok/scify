@@ -2,6 +2,7 @@ from cython.parallel import prange
 import numpy as np
 
 from libc cimport math as cm
+cimport numpy as cnp
 
 from scify cimport _machine as m
 from .cheb cimport cheb_eval
@@ -28,38 +29,36 @@ cdef:
     ])
 
 
-        Cl_2(x) = - \int_0^x \log(2 \sin(t/2)) dt
-
-    See the `Wikipedia <https://en.wikipedia.org/wiki/Clausen_function>`_ article
-    for more information.
-
-    Parameters
-    ----------
-    x: {array_like, scalar}
-        Numeric vector input
-
-    Returns
-    -------
-    {array_like, scalar}
-        Clausen output
-    """
-    cdef:
-        double[::1] arr
-        long i, n
-
+def clausen(x, bint threaded=True):
     if np.isscalar(x):
         return _clausen(x)
 
-    arr = np.ravel(x)
-    n = len(arr)
-    for i in prange(n, nogil=True):
-        arr[i] = _clausen(arr[i])
+    cdef:
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        int n = arr.size
 
-    return np.reshape(arr, np.shape(x))
+    if threaded:
+        clausen_p(arr, n)
+    else:
+        clausen_s(arr, n)
+
+    return arr.reshape(np.shape(x))
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
+cdef void clausen_p(double[::1] x, int size) nogil:
+    """Parallel"""
+    cdef int i
+    for i in prange(size, nogil=True):
+        x[i] = _clausen(x[i])
+
+
+cdef void clausen_s(double[::1] x, int size) nogil:
+    """Single Thread"""
+    cdef int i
+    for i in range(size):
+        x[i] = _clausen(x[i])
+
+
 cdef double _clausen(double x) nogil:
     cdef:
         double x_cut = m.M_PI * m.DBL_EPSILON

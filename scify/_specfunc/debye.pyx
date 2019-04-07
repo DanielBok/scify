@@ -2,9 +2,26 @@ from cython.parallel import prange
 import numpy as np
 
 from libc cimport math as cm
+cimport numpy as cnp
 
 from scify cimport _machine as m
 from .cheb cimport cheb_eval
+
+ctypedef double (*DFunc) (double) nogil
+
+
+cdef void debye_p(DFunc f, double[::1] x, int size) nogil:
+    """Parallel"""
+    cdef int i
+    for i in prange(size, nogil=True):
+        x[i] = f(x[i])
+
+
+cdef void debye_s(DFunc f, double[::1] x, int size) nogil:
+    """Single Thread"""
+    cdef int i
+    for i in range(size):
+        x[i] = f(x[i])
 
 
 cdef:
@@ -129,12 +146,16 @@ def debye_1(x, bint threaded):
     if np.isscalar(x):
         return _debye_1(x)
 
-    arr = np.ravel(x)
-    n = len(arr)
-    for i in prange(n, nogil=True):
-        arr[i] = _debye_1(arr[i])
+    cdef:
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        int n = arr.size
 
-    return np.reshape(arr, np.shape(x))
+    if threaded:
+        debye_p(_debye_1, arr, n)
+    else:
+        debye_s(_debye_1, arr, n)
+
+    return arr.reshape(np.shape(x))
 
 
 cdef double _debye_1(double x) nogil:
@@ -168,12 +189,16 @@ def debye_2(x, bint threaded):
     if np.isscalar(x):
         return _debye_2(x)
 
-    arr = np.ravel(x)
-    n = len(arr)
-    for i in prange(n, nogil=True):
-        arr[i] = _debye_2(arr[i])
+    cdef:
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        int n = arr.size
 
-    return np.reshape(arr, np.shape(x))
+    if threaded:
+        debye_p(_debye_2, arr, n)
+    else:
+        debye_s(_debye_2, arr, n)
+
+    return arr.reshape(np.shape(x))
 
 
 cdef double _debye_2(double x) nogil:
@@ -210,12 +235,16 @@ def debye_3(x, bint threaded):
     if np.isscalar(x):
         return _debye_3(x)
 
-    arr = np.ravel(x)
-    n = len(arr)
-    for i in prange(n, nogil=True):
-        arr[i] = _debye_3(arr[i])
+    cdef:
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        int n = arr.size
 
-    return np.reshape(arr, np.shape(x))
+    if threaded:
+        debye_p(_debye_3, arr, n)
+    else:
+        debye_s(_debye_3, arr, n)
+
+    return arr.reshape(np.shape(x))
 
 
 cdef double _debye_3(double x) nogil:
@@ -251,12 +280,16 @@ def debye_4(x, bint threaded):
     if np.isscalar(x):
         return _debye_4(x)
 
-    arr = np.ravel(x)
-    n = len(arr)
-    for i in prange(n, nogil=True):
-        arr[i] = _debye_4(arr[i])
+    cdef:
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        int n = arr.size
 
-    return np.reshape(arr, np.shape(x))
+    if threaded:
+        debye_p(_debye_4, arr, n)
+    else:
+        debye_s(_debye_4, arr, n)
+
+    return arr.reshape(np.shape(x))
 
 
 cdef double _debye_4(double x) nogil:
@@ -292,12 +325,16 @@ def debye_5(x, bint threaded):
     if np.isscalar(x):
         return _debye_5(x)
 
-    arr = np.ravel(x)
-    n = len(arr)
-    for i in prange(n, nogil=True):
-        arr[i] = _debye_5(arr[i])
+    cdef:
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        int n = arr.size
 
-    return np.reshape(arr, np.shape(x))
+    if threaded:
+        debye_p(_debye_5, arr, n)
+    else:
+        debye_s(_debye_5, arr, n)
+
+    return arr.reshape(np.shape(x))
 
 
 cdef double _debye_5(double x) nogil:
@@ -333,12 +370,16 @@ def debye_6(x, bint threaded):
     if np.isscalar(x):
         return _debye_6(x)
 
-    arr = np.ravel(x)
-    n = len(arr)
-    for i in prange(n, nogil=True):
-        arr[i] = _debye_6(arr[i])
+    cdef:
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        int n = arr.size
 
-    return np.reshape(arr, np.shape(x))
+    if threaded:
+        debye_p(_debye_6, arr, n)
+    else:
+        debye_s(_debye_6, arr, n)
+
+    return arr.reshape(np.shape(x))
 
 
 cdef double _debye_6(double x) nogil:

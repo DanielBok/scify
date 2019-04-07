@@ -2,10 +2,28 @@ from cython.parallel import prange
 import numpy as np
 
 from libc cimport math as cm
+cimport numpy as cnp
 
 from scify cimport _machine as m
 from .cheb cimport cheb_eval_mode
 from .trig cimport cos_err, sin_err
+
+
+ctypedef double (*DFunc) (double) nogil
+
+
+cdef void airy_p(DFunc f, double[::1] x, int size) nogil:
+    """Parallel"""
+    cdef int i
+    for i in prange(size, nogil=True):
+        x[i] = f(x[i])
+
+
+cdef void airy_s(DFunc f, double[::1] x, int size) nogil:
+    """Single Thread"""
+    cdef int i
+    for i in range(size):
+        x[i] = f(x[i])
 
 
 cdef:
@@ -349,41 +367,20 @@ cdef double airy_aie(double x) nogil:
     return (0.28125 + cheb_eval_mode(aie, z, -1, 1)) / cm.sqrt(sqx)
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-def airy_Ai(x):
-    r"""
-    Computes the Airy function of the first kind. This is defined as
-
-    .. math::
-
-        Ai(x) = (1/\pi) \int_0^\infty \cos(\t^3/3 + xt) dt
-
-    For more information, checkout the article on `Wikipedia <https://en.wikipedia.org/wiki/Airy_function>`_
-
-    Parameters
-    ----------
-    x: {array_like, scalar}
-        Numerical vector
-
-    Returns
-    -------
-    array_like or scalar
-        Values from the Airy function
-    """
-    cdef:
-        double[::1] arr
-        long i, n
-
+def airy_Ai(x, bint threaded):
     if np.isscalar(x):
         return _airy_Ai(x)
 
-    arr = np.ravel(x)
-    n = len(arr)
-    for i in prange(n, nogil=True):
-        arr[i] = _airy_Ai(arr[i])
+    cdef:
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        int n = arr.size
 
-    return np.reshape(arr, np.shape(x))
+    if threaded:
+        airy_p(_airy_Ai, arr, n)
+    else:
+        airy_s(_airy_Ai, arr, n)
+
+    return arr.reshape(np.shape(x))
 
 
 cdef double _airy_Ai(double x) nogil:
@@ -406,46 +403,20 @@ cdef double _airy_Ai(double x) nogil:
         return z
 
 
-def airy_Ai_scaled(x):
-    r"""
-    Computes a scaled version of the Airy function of the first kind.
-
-    This is defined as
-
-    .. math::
-
-        Ai_s = \left.
-        \begin{cases}
-            (1/\pi) \int_0^\infty \cos(\t^3/3 + xt) dt, & x < 0 \\
-            \exp^{1.5 x^1.5} (1/\pi) \int_0^\infty \cos(\t^3/3 + xt) dt, & x \geq 0
-        \end{cases}
-        \right}
-
-    For more information, checkout the article on `Wikipedia <https://en.wikipedia.org/wiki/Airy_function>`_
-
-    Parameters
-    ----------
-    x: {array_like, scalar}
-        Numerical vector
-
-    Returns
-    -------
-    array_like or scalar
-        Values from the Airy function
-    """
-    cdef:
-        double[::1] arr
-        long i, n
-
+def airy_Ai_scaled(x, bint threaded):
     if np.isscalar(x):
         return _airy_Ai_scaled(x)
 
-    arr = np.ravel(x)
-    n = len(arr)
-    for i in prange(n, nogil=True):
-        arr[i] = _airy_Ai_scaled(arr[i])
+    cdef:
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        int n = arr.size
 
-    return np.reshape(arr, np.shape(x))
+    if threaded:
+        airy_p(_airy_Ai_scaled, arr, n)
+    else:
+        airy_s(_airy_Ai_scaled, arr, n)
+
+    return arr.reshape(np.shape(x))
 
 
 cdef double _airy_Ai_scaled(double x) nogil:
@@ -483,39 +454,20 @@ cdef double airy_bie(double x) nogil:
         return (0.625 + cheb_eval_mode(bip2, z, -1, 1)) / y
 
 
-def airy_Bi(x):
-    r"""
-    Computes the Airy function of the second kind. This is defined as
-
-    .. math::
-
-        Ai(x) = (1/\pi) \int_0^\infty \cos(\t^3/3 + xt) dt
-
-    For more information, checkout the article on `Wikipedia <https://en.wikipedia.org/wiki/Airy_function>`_
-
-    Parameters
-    ----------
-    x: {array_like, scalar}
-        Numerical vector
-
-    Returns
-    -------
-    array_like or scalar
-        Values from the Airy function
-    """
-    cdef:
-        double[::1] arr
-        long i, n
-
+def airy_Bi(x, bint threaded):
     if np.isscalar(x):
         return _airy_Bi(x)
 
-    arr = np.ravel(x)
-    n = len(arr)
-    for i in prange(n, nogil=True):
-        arr[i] = _airy_Bi(arr[i])
+    cdef:
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        int n = arr.size
 
-    return np.reshape(arr, np.shape(x))
+    if threaded:
+        airy_p(_airy_Bi, arr, n)
+    else:
+        airy_s(_airy_Bi, arr, n)
+
+    return arr.reshape(np.shape(x))
 
 
 cdef double _airy_Bi(double x) nogil:
@@ -545,46 +497,20 @@ cdef double _airy_Bi(double x) nogil:
         return airy_bie(x) * cm.exp(y)
 
 
-def airy_Bi_scaled(x):
-    r"""
-    Computes a scaled version of the Airy function of the second kind.
-
-    This is defined as
-
-    .. math::
-
-        Bi_s = \left.
-        \begin{cases}
-            (1/\pi) \int_0^\infty \left[ e^{-(t^3/3) + xt} + \sin((t^3/3) + xt) \right] dt, & x < 0 \\
-            \exp^{1.5 x^1.5} (1/\pi) \int_0^\infty \left[ e^{-(t^3/3) + xt} + \sin((t^3/3) + xt) \right] dt, & x \geq 0
-        \end{cases}
-        \right}
-
-    For more information, checkout the article on `Wikipedia <https://en.wikipedia.org/wiki/Airy_function>`_
-
-    Parameters
-    ----------
-    x: {array_like, scalar}
-        Numerical vector
-
-    Returns
-    -------
-    array_like or scalar
-        Values from the Airy function
-    """
-    cdef:
-        double[::1] arr
-        long i, n
-
+def airy_Bi_scaled(x, bint threaded):
     if np.isscalar(x):
         return _airy_Bi_scaled(x)
 
-    arr = np.ravel(x)
-    n = len(arr)
-    for i in prange(n, nogil=True):
-        arr[i] = _airy_Bi_scaled(arr[i])
+    cdef:
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        int n = arr.size
 
-    return np.reshape(arr, np.shape(x))
+    if threaded:
+        airy_p(_airy_Bi_scaled, arr, n)
+    else:
+        airy_s(_airy_Bi_scaled, arr, n)
+
+    return arr.reshape(np.shape(x))
 
 
 cdef double _airy_Bi_scaled(double x) nogil:

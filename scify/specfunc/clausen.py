@@ -1,7 +1,7 @@
 from .._specfunc import clausen as c
 
 
-def clausen(x):
+def clausen(x, threaded=True):
     r"""
     The Clausen function is defined by the following integral,
 
@@ -17,9 +17,12 @@ def clausen(x):
     x: {array_like, scalar}
         Numeric vector input
 
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
     Returns
     -------
     array_like or scalar
         Clausen output
     """
-    return c.clausen(x)
+    return c.clausen(x, threaded)

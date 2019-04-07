@@ -4,12 +4,29 @@ from cython.parallel import prange
 import numpy as np
 
 from libc cimport math as cm
-
+cimport numpy as cnp
 
 from scify cimport _machine as m
 from ._results cimport Result, make_r
-from .cheb cimport cheb_eval_mode, cheb_eval_mode_e
+from .cheb cimport cheb_eval_mode_e
 from .exp cimport exp_mult_err
+
+
+ctypedef Result (*DFunc) (double) nogil
+
+
+cdef void airy_p(DFunc f, double[::1] x, int size) nogil:
+    """Parallel"""
+    cdef int i
+    for i in prange(size, nogil=True):
+        x[i] = f(x[i]).val
+
+
+cdef void airy_s(DFunc f, double[::1] x, int size) nogil:
+    """Single Thread"""
+    cdef int i
+    for i in range(size):
+        x[i] = f(x[i]).val
 
 
 cdef:
@@ -360,33 +377,20 @@ cdef (Result, Result) airy_deriv_mod_phase(double x) nogil:
     )
 
 
-def airy_Ai_deriv(x):
-    """
-    Compute the derivative of the Airy function the first kind
-
-    Parameters
-    ----------
-    x: {array_like, scalar}
-        Numerical vector
-
-    Returns
-    -------
-    array_like or scalar
-        Derivative values from the Airy function
-    """
-    cdef:
-        double[::1] arr
-        long i, n
-
+def airy_Ai_deriv(x, bint threaded):
     if np.isscalar(x):
         return _airy_Ai_deriv(x).val
 
-    arr = np.ravel(x)
-    n = len(arr)
-    for i in prange(n, nogil=True):
-        arr[i] = _airy_Ai_deriv(arr[i]).val
+    cdef:
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        int n = arr.size
 
-    return np.reshape(arr, np.shape(x))
+    if threaded:
+        airy_p(_airy_Ai_deriv, arr, n)
+    else:
+        airy_s(_airy_Ai_deriv, arr, n)
+
+    return arr.reshape(np.shape(x))
 
 
 cdef Result _airy_Ai_deriv(double x) nogil:
@@ -422,34 +426,20 @@ cdef Result _airy_Ai_deriv(double x) nogil:
         return make_r(cm.NAN, cm.NAN)
 
 
-def airy_Ai_deriv_scaled(x):
-    """
-    Compute the scaled derivative of the Airy function the first kind
-
-    Parameters
-    ----------
-    x: {array_like, scalar}
-        Numerical vector
-
-    Returns
-    -------
-    array_like or scalar
-        Derivative values from the Airy function
-    """
-    cdef:
-        double[::1] arr
-        long i, n
-        double err
-
+def airy_Ai_deriv_scaled(x, threaded):
     if np.isscalar(x):
         return _airy_Ai_deriv_scaled(x).val
 
-    arr = np.ravel(x)
-    n = len(arr)
-    for i in prange(n, nogil=True):
-        arr[i] = _airy_Ai_deriv_scaled(arr[i]).val
+    cdef:
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        int n = arr.size
 
-    return np.reshape(arr, np.shape(x))
+    if threaded:
+        airy_p(_airy_Ai_deriv_scaled, arr, n)
+    else:
+        airy_s(_airy_Ai_deriv_scaled, arr, n)
+
+    return arr.reshape(np.shape(x))
 
 
 cdef Result _airy_Ai_deriv_scaled(double x) nogil:

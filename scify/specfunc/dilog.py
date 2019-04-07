@@ -3,7 +3,7 @@ import numpy as np
 from .._specfunc import dilog as d
 
 
-def dilog(x):
+def dilog(x, threaded=True):
     r"""
     Computes the dilogarithm for a real argument. In Lewin’s notation this is  :math:`Li_2(x)`,
     the real part of the dilogarithm of a real :math:`x`. It is defined by the integral
@@ -16,15 +16,18 @@ def dilog(x):
     x: {array_like, scalar}
         Numeric vector input
 
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
     Returns
     -------
     array_like or scalar
         Real Dilog output
     """
-    return d.dilog(x)
+    return d.dilog(x, threaded)
 
 
-def dilog_complex(r, theta=None):
+def dilog_complex(r, theta=None, threaded=True):
     r"""
     This function computes the full complex-valued dilogarithm for the complex argument
     :math=:`z = r \exp(i \theta)`.
@@ -33,8 +36,12 @@ def dilog_complex(r, theta=None):
     ----------
     r: {array_like, scalar}
         The modulus of the complex vector or scalar. If `theta` is None, interpret `r` as a complex valued object
+
     theta: {array_like, scalar}, optional
         The argument of the complex vector or scalar
+
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
 
     Returns
     -------
@@ -45,4 +52,4 @@ def dilog_complex(r, theta=None):
         theta = np.angle(r)
         r = np.abs(r)
 
-    return d.dilog_complex(r, theta)
+    return d.dilog_complex(r, theta, threaded)

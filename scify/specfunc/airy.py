@@ -2,7 +2,7 @@ from .._specfunc import airy as a
 from .._specfunc import airy_deriv as d
 
 
-def airy_Ai(x):
+def airy_Ai(x, threaded=True):
     r"""
     Computes the Airy function of the first kind. This is defined as
 
@@ -17,15 +17,18 @@ def airy_Ai(x):
     x: {array_like, scalar}
         Numerical vector
 
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
     Returns
     -------
     array_like or scalar
         Values from the Airy function
     """
-    return a.airy_Ai(x)
+    return a.airy_Ai(x, threaded)
 
 
-def airy_Ai_deriv(x):
+def airy_Ai_deriv(x, threaded=True):
     """
     Compute the derivative of the Airy function the first kind
 
@@ -34,15 +37,18 @@ def airy_Ai_deriv(x):
     x: {array_like, scalar}
         Numerical vector
 
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
     Returns
     -------
     array_like or scalar
         Derivative values from the Airy function
     """
-    return d.airy_Ai_deriv(x)
+    return d.airy_Ai_deriv(x, threaded)
 
 
-def airy_Ai_scaled(x):
+def airy_Ai_scaled(x, threaded=True):
     r"""
     Computes a scaled version of the Airy function of the first kind.
 
@@ -64,15 +70,18 @@ def airy_Ai_scaled(x):
     x: {array_like, scalar}
         Numerical vector
 
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
     Returns
     -------
     array_like or scalar
         Values from the Airy function
     """
-    return a.airy_Ai_scaled(x)
+    return a.airy_Ai_scaled(x, threaded)
 
 
-def airy_Ai_deriv_scaled(x):
+def airy_Ai_deriv_scaled(x, threaded=True):
     """
     Compute the scaled derivative of the Airy function the first kind
 
@@ -81,15 +90,18 @@ def airy_Ai_deriv_scaled(x):
     x: {array_like, scalar}
         Numerical vector
 
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
     Returns
     -------
     array_like or scalar
         Derivative values from the Airy function
     """
-    return d.airy_Ai_deriv_scaled(x)
+    return d.airy_Ai_deriv_scaled(x, threaded)
 
 
-def airy_Bi(x):
+def airy_Bi(x, threaded=True):
     r"""
     Computes the Airy function of the second kind. This is defined as
 
@@ -104,15 +116,18 @@ def airy_Bi(x):
     x: {array_like, scalar}
         Numerical vector
 
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
     Returns
     -------
     array_like or scalar
         Values from the Airy function
     """
-    return a.airy_Bi(x)
+    return a.airy_Bi(x, threaded)
 
 
-def airy_Bi_scaled(x):
+def airy_Bi_scaled(x, threaded=True):
     r"""
     Computes a scaled version of the Airy function of the second kind.
 
@@ -134,9 +149,12 @@ def airy_Bi_scaled(x):
     x: {array_like, scalar}
         Numerical vector
 
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
     Returns
     -------
     array_like or scalar
         Values from the Airy function
     """
-    return a.airy_Bi_scaled(x)
+    return a.airy_Bi_scaled(x, threaded)

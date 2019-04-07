@@ -3,7 +3,7 @@ from .._specfunc import debye as d
 __all__ = ['debye_n', 'debye_1', 'debye_2', 'debye_3', 'debye_4', 'debye_5', 'debye_6']
 
 
-def debye_n(x, order=1):
+def debye_n(x, order=1, threaded=True):
     r"""
     Computes the nth order Debye function
 
@@ -21,6 +21,9 @@ def debye_n(x, order=1):
     order: {1, 2, 3, 4, 5, 6}
         Order of the Debye function. Limited to 6.
 
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
     Returns
     -------
     array_like or scalar
@@ -28,20 +31,20 @@ def debye_n(x, order=1):
     """
     assert 1 <= order <= 6, "Debye order must be between [1, 6]"
     if order == 1:
-        return debye_1(x)
+        return debye_1(x, threaded)
     elif order == 2:
-        return debye_2(x)
+        return debye_2(x, threaded)
     elif order == 3:
-        return debye_3(x)
+        return debye_3(x, threaded)
     elif order == 4:
-        return debye_4(x)
+        return debye_4(x, threaded)
     elif order == 5:  # pragma: no cover
-        return debye_5(x)
+        return debye_5(x, threaded)
     elif order == 6:  # pragma: no cover
-        return debye_6(x)
+        return debye_6(x, threaded)
 
 
-def debye_1(x):
+def debye_1(x, threaded=True):
     r"""
     Computes the first-order Debye function
 
@@ -54,15 +57,18 @@ def debye_1(x):
     x: array_like
         Real values
 
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
     Returns
     -------
     array_like or scalar
         Value of the Debye function
     """
-    return d.debye_1(x)
+    return d.debye_1(x, threaded)
 
 
-def debye_2(x):
+def debye_2(x, threaded=True):
     r"""
     Computes the second-order Debye function
 
@@ -74,15 +80,18 @@ def debye_2(x):
     x: array_like
         Real values
 
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
     Returns
     -------
     array_like or scalar
         Value of the Debye function
     """
-    return d.debye_2(x)
+    return d.debye_2(x, threaded)
 
 
-def debye_3(x):
+def debye_3(x, threaded=True):
     r"""
     Computes the third-order Debye function
 
@@ -95,15 +104,18 @@ def debye_3(x):
     x: array_like
         Real values
 
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
     Returns
     -------
     array_like or scalar
         Value of the Debye function
     """
-    return d.debye_3(x)
+    return d.debye_3(x, threaded)
 
 
-def debye_4(x):
+def debye_4(x, threaded=True):
     r"""
     Computes the fourth-order Debye function
 
@@ -116,15 +128,18 @@ def debye_4(x):
     x: array_like
         Real values
 
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
     Returns
     -------
     array_like or scalar
         Value of the Debye function
     """
-    return d.debye_4(x)
+    return d.debye_4(x, threaded)
 
 
-def debye_5(x):  # pragma: no cover
+def debye_5(x, threaded=True):  # pragma: no cover
     r"""
     Computes the fifth-order Debye function
 
@@ -137,15 +152,18 @@ def debye_5(x):  # pragma: no cover
     x: array_like
         Real values
 
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
     Returns
     -------
     array_like or scalar
         Value of the Debye function
     """
-    return d.debye_5(x)
+    return d.debye_5(x, threaded)
 
 
-def debye_6(x):  # pragma: no cover
+def debye_6(x, threaded=True):  # pragma: no cover
     r"""
     Computes the sixth-order Debye function
 
@@ -158,9 +176,12 @@ def debye_6(x):  # pragma: no cover
     x: array_like
         Real values
 
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
     Returns
     -------
     array_like or scalar
         Value of the Debye function
     """
-    return d.debye_6(x)
+    return d.debye_6(x, threaded)
