@@ -1,13 +1,11 @@
 import warnings
 
-cimport cython
 from libc cimport math as cm
 
 from scify cimport _machine as m
 from ._results cimport Result, make_r
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
+
 cdef Result exp_mult_err(double x, double dx, double y, double dy) nogil:
     cdef:
         double ay = cm.fabs(y), ex = cm.exp(x)

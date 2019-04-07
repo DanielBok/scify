@@ -3,7 +3,6 @@ import warnings
 from cython.parallel import prange
 import numpy as np
 
-cimport cython
 from libc cimport math as cm
 
 
@@ -327,8 +326,6 @@ cdef:
     ])
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef (Result, Result) airy_deriv_mod_phase(double x) nogil:
     cdef:
         double pi34 = 2.356194490192344928847  # 0.75pi
@@ -362,8 +359,7 @@ cdef (Result, Result) airy_deriv_mod_phase(double x) nogil:
                cm.fabs(phi.val) * (m.DBL_EPSILON + cm.fabs(phi.err / phi.val)))
     )
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
+
 def airy_Ai_deriv(x):
     """
     Compute the derivative of the Airy function the first kind
@@ -392,8 +388,7 @@ def airy_Ai_deriv(x):
 
     return np.reshape(arr, np.shape(x))
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
+
 cdef Result _airy_Ai_deriv(double x) nogil:
     cdef:
         Result a, p
@@ -427,8 +422,6 @@ cdef Result _airy_Ai_deriv(double x) nogil:
         return make_r(cm.NAN, cm.NAN)
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def airy_Ai_deriv_scaled(x):
     """
     Compute the scaled derivative of the Airy function the first kind
@@ -459,8 +452,6 @@ def airy_Ai_deriv_scaled(x):
     return np.reshape(arr, np.shape(x))
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef Result _airy_Ai_deriv_scaled(double x) nogil:
     cdef:
         Result a, p

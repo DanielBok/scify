@@ -1,9 +1,6 @@
-cimport cython
 from libc cimport math as cm
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef (double, double) complex_log(double zr, double zi) nogil:
     cdef:
         double ax, ay, min, max

@@ -1,7 +1,6 @@
 from cython.parallel import prange
 import numpy as np
 
-cimport cython
 from libc cimport math as cm
 
 from scify cimport _machine as m
@@ -320,9 +319,6 @@ cdef:
     ])
 
 
-
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef (double, double) airy_mod_phase(double x) nogil:
     """airy function for x < -1"""
     cdef:
@@ -344,8 +340,6 @@ cdef (double, double) airy_mod_phase(double x) nogil:
     return cm.sqrt(mod / sqx), m.M_PI_4 - x * sqx * phase
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef double airy_aie(double x) nogil:
     """airy function of the first kind for x >= 1"""
     cdef:
@@ -391,8 +385,7 @@ def airy_Ai(x):
 
     return np.reshape(arr, np.shape(x))
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
+
 cdef double _airy_Ai(double x) nogil:
     cdef:
         double mod, theta, z
@@ -413,8 +406,6 @@ cdef double _airy_Ai(double x) nogil:
         return z
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def airy_Ai_scaled(x):
     r"""
     Computes a scaled version of the Airy function of the first kind.
@@ -457,8 +448,6 @@ def airy_Ai_scaled(x):
     return np.reshape(arr, np.shape(x))
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef double _airy_Ai_scaled(double x) nogil:
     cdef:
         double mod, theta, z, val, scale
@@ -479,8 +468,6 @@ cdef double _airy_Ai_scaled(double x) nogil:
         return airy_aie(x)
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef double airy_bie(double x) nogil:
     """airy function of the second kind for x >= 2"""
     cdef:
@@ -496,8 +483,6 @@ cdef double airy_bie(double x) nogil:
         return (0.625 + cheb_eval_mode(bip2, z, -1, 1)) / y
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def airy_Bi(x):
     r"""
     Computes the Airy function of the second kind. This is defined as
@@ -533,8 +518,6 @@ def airy_Bi(x):
     return np.reshape(arr, np.shape(x))
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef double _airy_Bi(double x) nogil:
     cdef:
         double mod, theta, z, y, s
@@ -562,8 +545,6 @@ cdef double _airy_Bi(double x) nogil:
         return airy_bie(x) * cm.exp(y)
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def airy_Bi_scaled(x):
     r"""
     Computes a scaled version of the Airy function of the second kind.
@@ -606,8 +587,6 @@ def airy_Bi_scaled(x):
     return np.reshape(arr, np.shape(x))
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef double _airy_Bi_scaled(double x) nogil:
     cdef:
         double mod, theta, z, s

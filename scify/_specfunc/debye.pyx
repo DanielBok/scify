@@ -1,7 +1,6 @@
 from cython.parallel import prange
 import numpy as np
 
-cimport cython
 from libc cimport math as cm
 
 from scify cimport _machine as m
@@ -126,13 +125,7 @@ cdef:
     ])
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-def debye_1(x):
-    cdef:
-        double[::1] arr
-        long i, n
-
+def debye_1(x, bint threaded):
     if np.isscalar(x):
         return _debye_1(x)
 
@@ -144,8 +137,6 @@ def debye_1(x):
     return np.reshape(arr, np.shape(x))
 
 
-@cython.boundscheck(False)
-@cython.cdivision(True)
 cdef double _debye_1(double x) nogil:
     cdef:
         double val_infinity = 1.64493406684822644, xcut = -m.LOG_DBL_MIN
@@ -173,13 +164,7 @@ cdef double _debye_1(double x) nogil:
         return val_infinity / x
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-def debye_2(x):
-    cdef:
-        double[::1] arr
-        long i, n
-
+def debye_2(x, bint threaded):
     if np.isscalar(x):
         return _debye_2(x)
 
@@ -191,8 +176,6 @@ def debye_2(x):
     return np.reshape(arr, np.shape(x))
 
 
-@cython.boundscheck(False)
-@cython.cdivision(True)
 cdef double _debye_2(double x) nogil:
     cdef:
         double val_infinity = 4.80822761263837714, xcut = -m.LOG_DBL_MIN
@@ -223,14 +206,7 @@ cdef double _debye_2(double x) nogil:
         return val_infinity / x ** 2
 
 
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
-def debye_3(x):
-    cdef:
-        double[::1] arr
-        long i, n
-
+def debye_3(x, bint threaded):
     if np.isscalar(x):
         return _debye_3(x)
 
@@ -242,9 +218,6 @@ def debye_3(x):
     return np.reshape(arr, np.shape(x))
 
 
-
-@cython.boundscheck(False)
-@cython.cdivision(True)
 cdef double _debye_3(double x) nogil:
     cdef:
         double val_infinity = 19.4818182068004875, xcut = -m.LOG_DBL_MIN
@@ -274,13 +247,7 @@ cdef double _debye_3(double x) nogil:
         return val_infinity / x ** 3
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-def debye_4(x):
-    cdef:
-        double[::1] arr
-        long i, n
-
+def debye_4(x, bint threaded):
     if np.isscalar(x):
         return _debye_4(x)
 
@@ -292,8 +259,6 @@ def debye_4(x):
     return np.reshape(arr, np.shape(x))
 
 
-@cython.boundscheck(False)
-@cython.cdivision(True)
 cdef double _debye_4(double x) nogil:
     cdef:
         double val_infinity = 99.5450644937635129, xcut = -m.LOG_DBL_MIN
@@ -323,13 +288,7 @@ cdef double _debye_4(double x) nogil:
         return val_infinity / x ** 4
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-def debye_5(x):
-    cdef:
-        double[::1] arr
-        long i, n
-
+def debye_5(x, bint threaded):
     if np.isscalar(x):
         return _debye_5(x)
 
@@ -341,8 +300,6 @@ def debye_5(x):
     return np.reshape(arr, np.shape(x))
 
 
-@cython.boundscheck(False)
-@cython.cdivision(True)
 cdef double _debye_5(double x) nogil:
     cdef:
 
@@ -372,13 +329,7 @@ cdef double _debye_5(double x) nogil:
         return val_infinity / x ** 5
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-def debye_6(x):
-    cdef:
-        double[::1] arr
-        long i, n
-
+def debye_6(x, bint threaded):
     if np.isscalar(x):
         return _debye_6(x)
 
@@ -390,8 +341,6 @@ def debye_6(x):
     return np.reshape(arr, np.shape(x))
 
 
-@cython.boundscheck(False)
-@cython.cdivision(True)
 cdef double _debye_6(double x) nogil:
     cdef:
         double val_infinity = 4356.06887828990661194792541535, xcut = -m.LOG_DBL_MIN

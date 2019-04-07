@@ -1,7 +1,6 @@
 import numpy as np
 from cython.parallel import prange
 
-cimport cython
 from libc cimport math as cm
 cimport numpy as cnp
 
@@ -13,26 +12,7 @@ cdef:
     double PI = m.M_PI
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-def dilog(x):
-    r"""
-    Computes the dilogarithm for a real argument. In Lewin’s notation this is  :math:`Li_2(x)`,
-    the real part of the dilogarithm of a real :math:`x`. It is defined by the integral
-    representation :math:`Li_2(x) = -\Re \int_0^x \frac{\log(1-s)}{s} ds`.
-
-    Note that :math:`\Im(Li_2(x)) = 0 \forall x \leq 1` and :math:`\Im(Li_2(x)) = -\pi\log(x) \forall x > 1`.
-
-    Parameters
-    ----------
-    x: {array_like, scalar}
-        Numeric vector input
-
-    Returns
-    -------
-    {array_like, scalar}
-        Real Dilog output
-    """
+def dilog(x, bint threaded):
     if np.isscalar(x):
         return _dilog(x)
 
@@ -59,8 +39,6 @@ cdef double _dilog(double x) nogil:
         return -d1 + 0.5 * d2
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef double dilog_xge0(double x) nogil:
     """Calculates dilog for real :math:`x \geq 0"""
     cdef:
@@ -110,8 +88,6 @@ cdef double dilog_xge0(double x) nogil:
         return 0
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef double dilog_series_1(double x) nogil:
     cdef:
         double rk2, term = x, total = x
@@ -130,8 +106,6 @@ cdef double dilog_series_1(double x) nogil:
 
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef double dilog_series_2(double x) nogil:
     cdef:
         double ds, total = 0.5 * x, y = x, z = 0.0
@@ -154,12 +128,8 @@ cdef double dilog_series_2(double x) nogil:
     return total + z + 1
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-def dilog_complex(r, theta):
-    r"""
-    This function computes the full complex-valued dilogarithm for the complex argument
-    :math=:`z = r \exp(i \theta)`.
+def dilog_complex(r, theta, bint threaded):
+    assert np.shape(r) == np.shape(theta), "Radius of complex vector must have same shape as the angled part"
 
     Parameters
     ----------
@@ -190,8 +160,7 @@ def dilog_complex(r, theta):
     return (r_vec + 1j * theta_vec).reshape(shape)
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
+
 cdef (double, double) _dilog_complex(double r, double theta) nogil:
     cdef:
         double x = r * cm.cos(theta)
@@ -226,7 +195,6 @@ cdef (double, double) _dilog_complex(double r, double theta) nogil:
         return real, imag
 
 
-@cython.nonecheck(False)
 cdef (double, double) dilogc_fundamental(double r, double x, double y) nogil:
     if r > 0.98:
         return dilogc_series_3(r, x, y)
@@ -236,8 +204,6 @@ cdef (double, double) dilogc_fundamental(double r, double x, double y) nogil:
         return dilogc_series_1(r, x, y)
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef (double, double) dilogc_unit_disk(double x, double y) nogil:
     cdef:
         double r = cm.hypot(x, y)
@@ -261,8 +227,6 @@ cdef (double, double) dilogc_unit_disk(double x, double y) nogil:
         return dilogc_fundamental(r, x, y)
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef (double, double) dilogc_series_1(double r, double x, double y) nogil:
     cdef:
         double cos_theta = x / r
@@ -291,8 +255,6 @@ cdef (double, double) dilogc_series_1(double r, double x, double y) nogil:
     return real, imag
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef (double, double) dilogc_series_2(double r, double x, double y) nogil:
     cdef:
         double real, imag
@@ -312,9 +274,6 @@ cdef (double, double) dilogc_series_2(double r, double x, double y) nogil:
     return real + rx + 1, imag + ry
 
 
-@cython.boundscheck(False)
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef (double, double) dilogc_series_3(double r, double x, double y) nogil:
     cdef:
         double theta = cm.atan2(y, x)
@@ -352,8 +311,6 @@ cdef (double, double) dilogc_series_3(double r, double x, double y) nogil:
     return sum_re, sum_im
 
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
 cdef (double, double) series_2_c(double r, double x, double y) nogil:
     cdef:
         double cos_theta = x / r

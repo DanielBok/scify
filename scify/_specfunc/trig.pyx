@@ -1,6 +1,5 @@
 import numpy as np
 
-cimport cython
 from libc cimport math as cm
 
 from scify cimport _machine as m
@@ -36,8 +35,7 @@ cdef:
         -1.1821555255364833468288e-19
     ])
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
+
 cdef double angle_restrict_pos_err(double theta) nogil:
     cdef:
         double two_pi = 2 * PI
@@ -54,8 +52,7 @@ cdef double angle_restrict_pos_err(double theta) nogil:
 
     return r
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
+
 cdef double cos_err(double x) nogil:
     cdef:
         double abs_x = cm.fabs(x)
@@ -89,8 +86,7 @@ cdef double cos_err(double x) nogil:
 
     return val * sgn
 
-@cython.cdivision(True)
-@cython.nonecheck(False)
+
 cdef double sin_err(double x) nogil:
     cdef:
         double abs_x = cm.fabs(x)

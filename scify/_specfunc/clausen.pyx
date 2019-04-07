@@ -1,7 +1,6 @@
 from cython.parallel import prange
 import numpy as np
 
-cimport cython
 from libc cimport math as cm
 
 from scify cimport _machine as m
@@ -28,13 +27,6 @@ cdef:
         0.4e-18
     ])
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-def clausen(x):
-    r"""
-    The Clausen function is defined by the following integral,
-
-    .. math::
 
         Cl_2(x) = - \int_0^x \log(2 \sin(t/2)) dt
 

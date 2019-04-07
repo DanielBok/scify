@@ -66,8 +66,16 @@ def build_extensions():
                     define_macros=macros,
                 ))
 
-    directives = {'language_level': '3', 'linetrace': IS_DEV_MODE}
-    return cythonize(extensions, compiler_directives=directives)
+    compiler_directives = {
+        'boundscheck': False,
+        'wraparound': False,
+        'nonecheck': False,
+        'cdivision': True,
+        'language_level': '3',
+        'linetrace': IS_DEV_MODE,
+        'profile': IS_DEV_MODE,
+    }
+    return cythonize(extensions, compiler_directives=compiler_directives)
 
 
 with open('README.rst') as readme_file:
