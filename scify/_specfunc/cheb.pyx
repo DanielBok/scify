@@ -1,55 +1,40 @@
 from libc cimport math as cm
 
 from scify cimport _machine as m
-from ._results cimport make_r
+from ._results cimport Result, make_r
 
 
-cdef double cheb_eval(double[::1] constants, double x) nogil:
+cdef Result cheb_eval(double[::1] constants, double x, int a, int b) nogil:
     cdef:
-        double d = 0, dd = 0
-        int j, n = len(constants)
-
-    for j in range(n - 1, 0, -1):
-        dd, d = d, 2 * x * d - dd + constants[j]
-
-    return x * d - dd + 0.5 * constants[0]
-
-
-cdef double cheb_eval_(double*constants, double x, int length) nogil:
-    cdef:
-        double d = 0, dd = 0
-        int j
-
-    for j in range(length - 1, 0, -1):
-        dd, d = d, 2 * x * d - dd + constants[j]
-
-    return x * d - dd + 0.5 * constants[0]
-
-
-cdef double cheb_eval_mode(double[::1] constants, double x, int a, int b) nogil:
-    cdef:
-        double d = 0, dd = 0
-        double y = (2 * x - a - b) / (b - a)  # a: upper bound, b: lower bound
+        double d = 0, dd = 0, err = 0
+        double y = (2. * x - a - b) / (b - a)
         double y2 = 2 * y
-        int j, n = len(constants)
+        double temp
+        size_t i, n = len(constants)
 
-    for j in range(n - 1, 0, -1):
-        dd, d = d, y2 * d - dd + constants[j]
+    for i in range(n - 1, 0, -1):
+        temp = d
+        d = y2 * d - dd + constants[i]
+        err += cm.fabs(y2*temp) + cm.fabs(dd) + cm.fabs(constants[i])
+        dd = temp
 
-    return y * d - dd + 0.5 * constants[0]
+    temp = d
+    d = y * d - dd + 0.5 * constants[0]
+    err += cm.fabs(y * temp) + cm.fabs(dd) + 0.5 * cm.fabs(constants[0])
+
+    return make_r(d, m.DBL_EPSILON * err + cm.fabs(constants[n - 1]))
 
 
-cdef Result cheb_eval_mode_e(double[::1] constants, double x, int a, int b) nogil:
+cdef Result cheb_eval_mode(double[::1] constants, double x, int a, int b) nogil:
     cdef:
         double d = 0, dd = 0
-        double y = (2 * x - a - b) / (b - a)  # a: upper bound, b: lower bound
-        size_t length = len(constants)
+        double y = (2 * x - a - b) / (b - a)
         double y2 = 2 * y
         double val, err
-        int j
+        size_t i, length = len(constants)
 
-    for j in range(length - 1, 0, -1):
-        dd, d = d, y2 * d - dd + constants[j]
+    for i in range(length - 1, 0, -1):
+        dd, d = d, y2 * d - dd + constants[i]
 
     val = y * d - dd + 0.5 * constants[0]
     err = m.DBL_EPSILON * cm.fabs(val) + length

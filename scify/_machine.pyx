@@ -74,5 +74,5 @@ cdef:
     double M_EULER = 0.57721566490153286060651209008
 
 
-cdef double sign(double x) nogil:
+cdef int sign(double x) nogil:
     return 1 if x >= 0 else -1

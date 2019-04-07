@@ -73,4 +73,4 @@ cdef:
     double M_LNPI
     double M_EULER
 
-    double sign(double) nogil
+    int sign(double) nogil

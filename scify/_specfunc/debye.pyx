@@ -1,28 +1,16 @@
-from cython.parallel import prange
 import numpy as np
 
 from libc cimport math as cm
 cimport numpy as cnp
 
 from scify cimport _machine as m
+from ._results cimport Result, make_r_0, make_r_nan, map_dbl_p, map_dbl_s
 from .cheb cimport cheb_eval
 
 ctypedef double (*DFunc) (double) nogil
 
 
-cdef void debye_p(DFunc f, double[::1] x, int size) nogil:
-    """Parallel"""
-    cdef int i
-    for i in prange(size, nogil=True):
-        x[i] = f(x[i])
-
-
-cdef void debye_s(DFunc f, double[::1] x, int size) nogil:
-    """Single Thread"""
-    cdef int i
-    for i in range(size):
-        x[i] = f(x[i])
-
+cdef double X_CUT = -m.LOG_DBL_MIN
 
 cdef:
     double[::1] db1 = np.array([
@@ -144,77 +132,100 @@ cdef:
 
 def debye_1(x, bint threaded):
     if np.isscalar(x):
-        return _debye_1(x)
+        return _debye_1(x).val
 
     cdef:
         cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
         int n = arr.size
 
     if threaded:
-        debye_p(_debye_1, arr, n)
+        map_dbl_p(_debye_1, arr, n)
     else:
-        debye_s(_debye_1, arr, n)
+        map_dbl_s(_debye_1, arr, n)
 
     return arr.reshape(np.shape(x))
 
 
-cdef double _debye_1(double x) nogil:
+cdef Result _debye_1(double x) nogil:
     cdef:
-        double val_infinity = 1.64493406684822644, xcut = -m.LOG_DBL_MIN
+        Result res = make_r_0()
+        Result c
+        double val_infinity = 1.64493406684822644
         int i, nexp
         double total, ex
 
     if x < 0:
-        return cm.NAN
+        return make_r_nan()
+
     elif x < 2 * m.SQRT_DBL_EPSILON:
-        return 1 - 0.25 * x + x ** 2 / 36
+        res.val = 1 - 0.25 * x + x ** 2 / 36.
+        res.err = m.DBL_EPSILON * cm.fabs(res.val)
+
     elif x <= 4:
-        return cheb_eval(db1, x * x / 8 - 1) - 0.25 * x
+        c = cheb_eval(db1, x * x / 8. - 1, -1, 1)
+        res.val = c.val - 0.25 * x
+        res.err = c.err + 0.25 * x * m.DBL_EPSILON
+
     elif x <= -(m.M_LN2 + m.LOG_DBL_EPSILON):
-        nexp = <int> cm.floor(xcut / x)
+        nexp = <int> cm.floor(X_CUT / x)
         ex = cm.exp(-x)
         total = 0.0
         for i in range(nexp, 0, -1):
             total *= ex
             total += (1 + 1 / (x * i)) / i
 
-        return val_infinity / x - total * ex
-    elif x < xcut:
-        return (val_infinity - cm.exp(-x) * (x + 1)) / x
+        res.val = val_infinity / x - total * ex
+        res.err = m.DBL_EPSILON * cm.fabs(res.val)
+
+    elif x < X_CUT:
+        res.val = (val_infinity - cm.exp(-x) * (x + 1)) / x
+        res.err = m.DBL_EPSILON * cm.fabs(res.val)
+
     else:
-        return val_infinity / x
+        res.val = val_infinity / x
+        res.err = m.DBL_EPSILON * cm.fabs(res.val)
+
+    return res
 
 
 def debye_2(x, bint threaded):
     if np.isscalar(x):
-        return _debye_2(x)
+        return _debye_2(x).val
 
     cdef:
         cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
         int n = arr.size
 
     if threaded:
-        debye_p(_debye_2, arr, n)
+        map_dbl_p(_debye_2, arr, n)
     else:
-        debye_s(_debye_2, arr, n)
+        map_dbl_s(_debye_2, arr, n)
 
     return arr.reshape(np.shape(x))
 
 
-cdef double _debye_2(double x) nogil:
+cdef Result _debye_2(double x) nogil:
     cdef:
-        double val_infinity = 4.80822761263837714, xcut = -m.LOG_DBL_MIN
+        Result res = make_r_0()
+        Result c
+        double val_infinity = 4.80822761263837714, x2 = x ** 2
         int i, nexp
-        double total, ex
+        double total, ex, xi
 
     if x < 0:
-        return cm.NAN
+        return make_r_nan()
+
     elif x < 2 * m.M_SQRT2 * m.SQRT_DBL_EPSILON:
-        return 1 - x / 3 + x ** 2 / 24
+        res.val = 1 - x / 3 + x2 / 24
+        res.err = m.DBL_EPSILON * res.val
+
     elif x <= 4:
-        return cheb_eval(db2, x * x / 8 - 1) - x / 3
+        c = cheb_eval(db2, x * x / 8. - 1, -1, 1)
+        res.val = c.val - x / 3.
+        res.err = c.err + m.DBL_EPSILON * x / 3.
+
     elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
-        nexp = <int> cm.floor(xcut / x)
+        nexp = <int> cm.floor(X_CUT / x)
         ex = cm.exp(-x)
         total = 0.0
         for i in range(nexp, 0, -1):
@@ -222,45 +233,58 @@ cdef double _debye_2(double x) nogil:
             xi = x * i
             total += (1 + 2 / xi + 2 / (xi ** 2)) / i
 
-        return val_infinity / x ** 2 - 2 * total * ex
-    elif x < xcut:
-        x2 = x ** 2
+        res.val = val_infinity / x ** 2 - 2 * total * ex
+        res.err = m.DBL_EPSILON * cm.fabs(res.val)
+
+    elif x < X_CUT:
         total = 2 + 2 * x + x2
-        return (val_infinity - 2 * total * cm.exp(-x)) / x2
+        res.val = (val_infinity - 2 * total * cm.exp(-x)) / x2
+        res.err = m.DBL_EPSILON * cm.fabs(res.val)
+
     else:
-        return val_infinity / x ** 2
+        res.val = val_infinity / x2
+        res.err = m.DBL_EPSILON * res.val
+
+    return res
 
 
 def debye_3(x, bint threaded):
     if np.isscalar(x):
-        return _debye_3(x)
+        return _debye_3(x).val
 
     cdef:
         cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
         int n = arr.size
 
     if threaded:
-        debye_p(_debye_3, arr, n)
+        map_dbl_p(_debye_3, arr, n)
     else:
-        debye_s(_debye_3, arr, n)
+        map_dbl_s(_debye_3, arr, n)
 
     return arr.reshape(np.shape(x))
 
 
-cdef double _debye_3(double x) nogil:
+cdef Result _debye_3(double x) nogil:
     cdef:
-        double val_infinity = 19.4818182068004875, xcut = -m.LOG_DBL_MIN
+        Result res = make_r_0()
+        Result c
+        double val_infinity = 19.4818182068004875, x3 = x ** 3
         int i, nexp
-        double total, ex
+        double total, ex, xinv
 
     if x < 0:
-        return cm.NAN
+        return make_r_nan()
     elif x < 2.0 * m.M_SQRT2 * m.SQRT_DBL_EPSILON:
-        return 1 - 3 * x / 8 + x ** 2 / 20
+        res.val = 1 - 3 * x / 8 + x ** 2 / 20
+        res.err = m.DBL_EPSILON * res.val
+
     elif x <= 4:
-        return cheb_eval(db3, x * x / 8 - 1) - 0.375 * x
+        c = cheb_eval(db3, x * x / 8. - 1, -1, 1)
+        res.val = c.val - 0.375 * x
+        res.err = c.err + m.DBL_EPSILON * 0.375 * x
+
     elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
-        nexp = <int>cm.floor(xcut / x)
+        nexp = <int>cm.floor(X_CUT / x)
         ex = cm.exp(-x)
         total = 0.0
         for i in range(nexp, 0, -1):
@@ -268,44 +292,59 @@ cdef double _debye_3(double x) nogil:
             total *= ex
             total += (((6 * xinv + 6) * xinv + 3) * xinv + 1) / i
 
-        return val_infinity / x ** 3 - 3 * total * ex
-    elif x < xcut:
-        total = 6 + 6 * x + 3 * x ** 2 + x ** 3
-        return (val_infinity - 3 * total * cm.exp(-x)) / x ** 3
+        res.val = val_infinity / x ** 3 - 3 * total * ex
+        res.err = m.DBL_EPSILON * res.val
+
+    elif x < X_CUT:
+        total = 6 + 6 * x + 3 * x ** 2 + x3
+        res.val = (val_infinity - 3 * total * cm.exp(-x)) / x3
+        res.err = m.DBL_EPSILON * res.val
+        
     else:
-        return val_infinity / x ** 3
+        res.val = val_infinity / x3
+        res.err = m.DBL_EPSILON * res.val
+    
+    return res
 
 
 def debye_4(x, bint threaded):
     if np.isscalar(x):
-        return _debye_4(x)
+        return _debye_4(x).val
 
     cdef:
         cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
         int n = arr.size
 
     if threaded:
-        debye_p(_debye_4, arr, n)
+        map_dbl_p(_debye_4, arr, n)
     else:
-        debye_s(_debye_4, arr, n)
+        map_dbl_s(_debye_4, arr, n)
 
     return arr.reshape(np.shape(x))
 
 
-cdef double _debye_4(double x) nogil:
+cdef Result _debye_4(double x) nogil:
     cdef:
-        double val_infinity = 99.5450644937635129, xcut = -m.LOG_DBL_MIN
+        Result res = make_r_0()
+        Result c
+        double val_infinity = 99.5450644937635129, x4 = x ** 4
         int i, nexp
-        double total, ex
+        double total, ex, xinv         
 
     if x < 0:
-        return cm.NAN
+        return make_r_nan()
+    
     elif x < 2.0 * m.M_SQRT2 * m.SQRT_DBL_EPSILON:
-        return 1 - 2 * x / 5 + x ** 2 / 18
+        res.val = 1 - 2 * x / 5 + x ** 2 / 18
+        res.err = m.DBL_EPSILON * res.val
+        
     elif x <= 4:
-        return cheb_eval(db4, x * x / 8 - 1) - 0.4 * x
+        c = cheb_eval(db4, x * x / 8. - 1, -1, 1)
+        res.val = c.val - 0.4 * x
+        res.err = c.err + m.DBL_EPSILON * 0.4 * x
+
     elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
-        nexp = <int> cm.floor(xcut / x)
+        nexp = <int> cm.floor(X_CUT / x)
         ex = cm.exp(-x)
         total = 0.0
         for i in range(nexp, 0, -1):
@@ -313,98 +352,134 @@ cdef double _debye_4(double x) nogil:
             total *= ex
             total += ((((24 * xinv + 24) * xinv + 12) * xinv + 4) * xinv + 1) / i
 
-        return val_infinity / x ** 4 - 4 * total * ex
-    elif x < xcut:
-        total = 24 + 24 * x + 12 * x ** 2 + 4 * x ** 3 + x ** 4
-        return (val_infinity - 4 * total * cm.exp(-x)) / x ** 4
-    else:
-        return val_infinity / x ** 4
+        res.val = val_infinity / x ** 4 - 4 * total * ex
+        res.err = m.DBL_EPSILON * res.val
 
+    elif x < X_CUT:
+        total = 24 + 24 * x + 12 * x ** 2 + 4 * x ** 3 + x4
+        res.val = (val_infinity - 4 * total * cm.exp(-x)) / x4
+        res.err = m.DBL_EPSILON * res.val
+
+    else:
+        res.val = val_infinity / x4
+        res.err = m.DBL_EPSILON * res.val
+
+    return res
 
 def debye_5(x, bint threaded):
     if np.isscalar(x):
-        return _debye_5(x)
+        return _debye_5(x).val
 
     cdef:
         cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
         int n = arr.size
 
     if threaded:
-        debye_p(_debye_5, arr, n)
+        map_dbl_p(_debye_5, arr, n)
     else:
-        debye_s(_debye_5, arr, n)
+        map_dbl_s(_debye_5, arr, n)
 
     return arr.reshape(np.shape(x))
 
 
-cdef double _debye_5(double x) nogil:
+cdef Result _debye_5(double x) nogil:
     cdef:
-
-        double val_infinity = 610.405837190669483828710757875, xcut = -m.LOG_DBL_MIN
+        Result res = make_r_0()
+        Result c
+        double val_infinity = 610.405837190669483828710757875, x5 = x ** 5
         int i, nexp
-        double total, ex
+        double total, ex, xinv
 
     if x < 0:
-        return cm.NAN
+        return make_r_nan()
+
     elif x < 2.0 * m.M_SQRT2 * m.SQRT_DBL_EPSILON:
-        return 1 - 5 * x / 12 + 5 * x ** 2 / 84
+        res.val = 1 - 5. * x / 12 + 5. * x ** 2 / 84
+        res.err = m.DBL_EPSILON * res.val
+
     elif x <= 4:
-        return cheb_eval(db5, x * x / 8 - 1) - 5 * x / 12
+        c = cheb_eval(db5, x * x / 8. - 1, -1, 1)
+        res.val = c.val - 5. * x / 12
+        res.err = c.err + m.DBL_EPSILON * 5. * x / 12
+
     elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
-        nexp = <int> cm.floor(xcut / x)
+        nexp = <int> cm.floor(X_CUT / x)
         ex = cm.exp(-x)
         total = 0.0
         for i in range(nexp, 0, -1):
             xinv = 1 / (x * i)
             total *= ex
             total += (((((120 * xinv + 120) * xinv + 60) * xinv + 20) * xinv + 5) * xinv + 1) / i
-        return val_infinity / x ** 5 - 5 * total * ex
-    elif x < xcut:
-        total = 120 + 120 * x + 60 * x ** 2 + 20 * x ** 3 + 5 * x ** 4 + x ** 5
-        return (val_infinity - 5 * total * cm.exp(-x)) / x ** 5
+        res.val = val_infinity / x5 - 5 * total * ex
+        res.err = m.DBL_EPSILON * res.val
+
+    elif x < X_CUT:
+        total = 120 + 120 * x + 60 * x ** 2 + 20 * x ** 3 + 5 * x ** 4 + x5
+        res.val = (val_infinity - 5 * total * cm.exp(-x)) / x5
+        res.err = m.DBL_EPSILON * res.val
+
     else:
-        return val_infinity / x ** 5
+        res.val = val_infinity / x5
+        res.err = m.DBL_EPSILON * res.val
+
+    return res
 
 
 def debye_6(x, bint threaded):
     if np.isscalar(x):
-        return _debye_6(x)
+        return _debye_6(x).val
 
     cdef:
         cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
         int n = arr.size
 
     if threaded:
-        debye_p(_debye_6, arr, n)
+        map_dbl_p(_debye_6, arr, n)
     else:
-        debye_s(_debye_6, arr, n)
+        map_dbl_s(_debye_6, arr, n)
 
     return arr.reshape(np.shape(x))
 
 
-cdef double _debye_6(double x) nogil:
+cdef Result _debye_6(double x) nogil:
     cdef:
-        double val_infinity = 4356.06887828990661194792541535, xcut = -m.LOG_DBL_MIN
+        Result res = make_r_0()
+        Result c
+        double val_infinity = 4356.06887828990661194792541535, x6 = x ** 6
         int i, nexp
-        double total, ex
+        double total, ex, xinv
 
     if x < 0:
-        return cm.NAN
+        return make_r_nan()
+
     elif x < 2.0 * m.M_SQRT2 * m.SQRT_DBL_EPSILON:
-        return 1 - 3 * x / 7 + x ** 2 / 16
+        res.val = 1 - 3. * x / 7 + x ** 2 / 16.
+        res.err = m.DBL_EPSILON * res.val
+
     elif x <= 4:
-        return cheb_eval(db6, x * x / 8 - 1) - 3 * x / 7
+        c = cheb_eval(db6, x * x / 8. - 1, -1, 1)
+        res.val = c.val - 3. * x / 7
+        res.err = c.err + m.DBL_EPSILON - 3. * x / 7
+
     elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
-        nexp = <int> cm.floor(xcut / x)
+        nexp = <int> cm.floor(X_CUT / x)
         ex = cm.exp(-x)
         total = 0.0
         for i in range(nexp, 0, -1):
             xinv = 1 / (x * i)
             total *= ex
             total += ((((((720 * xinv + 720) * xinv + 360) * xinv + 120) * xinv + 30) * xinv + 6) * xinv + 1) / i
-        return val_infinity / x ** 6 - 6 * total * ex
-    elif x < xcut:
-        total = 720 + 720 * x + 360 * x ** 2 + 120 * x ** 3 + 30 * x ** 4 + 6 * x ** 5 + x ** 6
-        return (val_infinity - 6 * total * cm.exp(-x)) / x ** 6
+
+        res.val =  val_infinity / x6 - 6 * total * ex
+        res.err = m.DBL_EPSILON * res.val
+
+    elif x < X_CUT:
+        total = 720 + 720 * x + 360 * x ** 2 + 120 * x ** 3 + 30 * x ** 4 + 6 * x ** 5 + x6
+        res.val = (val_infinity - 6 * total * cm.exp(-x)) / x6
+        res.err = m.DBL_EPSILON * res.val
+
     else:
-        return val_infinity / x ** 6
+        res.val = val_infinity / x6
+        res.err = m.DBL_EPSILON * res.val
+
+    return res

@@ -1,2 +1,4 @@
+from ._results cimport ComplexResult
+
 cdef:
-    (double, double) complex_log(double, double) nogil
+    ComplexResult complex_log(double, double) nogil

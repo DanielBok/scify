@@ -1,2 +1,4 @@
+from ._results cimport Result
+
 cdef:
-    double _clausen(double) nogil
+    Result _clausen(double) nogil

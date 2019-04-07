@@ -1,10 +1,10 @@
-from cython.parallel import prange
 import numpy as np
 
 from libc cimport math as cm
 cimport numpy as cnp
 
 from scify cimport _machine as m
+from ._results cimport Result, make_r_0, map_dbl_p, map_dbl_s
 from .cheb cimport cheb_eval
 from .trig cimport angle_restrict_pos_err
 
@@ -31,52 +31,48 @@ cdef:
 
 def clausen(x, bint threaded=True):
     if np.isscalar(x):
-        return _clausen(x)
+        return _clausen(x).val
 
     cdef:
         cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
         int n = arr.size
 
     if threaded:
-        clausen_p(arr, n)
+        map_dbl_p(_clausen, arr, n)
     else:
-        clausen_s(arr, n)
+        map_dbl_s(_clausen, arr, n)
 
     return arr.reshape(np.shape(x))
 
 
-cdef void clausen_p(double[::1] x, int size) nogil:
-    """Parallel"""
-    cdef int i
-    for i in prange(size, nogil=True):
-        x[i] = _clausen(x[i])
-
-
-cdef void clausen_s(double[::1] x, int size) nogil:
-    """Single Thread"""
-    cdef int i
-    for i in range(size):
-        x[i] = _clausen(x[i])
-
-
-cdef double _clausen(double x) nogil:
+cdef Result _clausen(double x) nogil:
     cdef:
+        Result res = make_r_0()
+        Result sr
         double x_cut = m.M_PI * m.DBL_EPSILON
-        double sgn = 1.0
+        int sgn = 1
 
     if x < 0:
         x = -x
-        sgn = -1.0
+        sgn = -1
 
-    x = angle_restrict_pos_err(x)
+    sr = angle_restrict_pos_err(x)
+
+    x = sr.val
 
     if x > m.M_PI:
         x = (6.28125 - x) + 1.9353071795864769253e-03
         sgn = -sgn
 
     if x == 0.0:
-        return 0
+        return res
     elif x < x_cut:
-        return x * (1.0 - cm.log(x)) * sgn
+        res.val = x * (1 - cm.log(x))
+        res.err = x * m.DBL_EPSILON
     else:
-        return x * (cheb_eval(constants, 2 * (x * x / (m.M_PI ** 2) - 0.5)) - cm.log(x)) * sgn
+        sr = cheb_eval(constants, 2 * (x * x / (m.M_PI ** 2) - 0.5), -1, 1)
+        res.val = x * (sr.val - cm.log(x))
+        res.err = x * (sr.err + m.DBL_EPSILON)
+
+    res.val *= sgn
+    return res

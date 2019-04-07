@@ -1,32 +1,12 @@
-import warnings
-
-from cython.parallel import prange
 import numpy as np
 
 from libc cimport math as cm
 cimport numpy as cnp
 
 from scify cimport _machine as m
-from ._results cimport Result, make_r
-from .cheb cimport cheb_eval_mode_e
+from ._results cimport Result, make_r, make_r_nan, map_dbl_p, map_dbl_s
+from .cheb cimport cheb_eval_mode
 from .exp cimport exp_mult_err
-
-
-ctypedef Result (*DFunc) (double) nogil
-
-
-cdef void airy_p(DFunc f, double[::1] x, int size) nogil:
-    """Parallel"""
-    cdef int i
-    for i in prange(size, nogil=True):
-        x[i] = f(x[i]).val
-
-
-cdef void airy_s(DFunc f, double[::1] x, int size) nogil:
-    """Single Thread"""
-    cdef int i
-    for i in range(size):
-        x[i] = f(x[i]).val
 
 
 cdef:
@@ -352,19 +332,19 @@ cdef (Result, Result) airy_deriv_mod_phase(double x) nogil:
 
     if x < -4:
         z = 128. / x ** 3 + 1
-        amp = cheb_eval_mode_e(an20, z, -1, 1)
-        phi = cheb_eval_mode_e(aph0, z, -1, 1)
+        amp = cheb_eval_mode(an20, z, -1, 1)
+        phi = cheb_eval_mode(aph0, z, -1, 1)
     elif x <= -2:
         z = (128./(x ** 3) + 9) / 7
-        amp = cheb_eval_mode_e(an21, z, -1, 1)
-        phi = cheb_eval_mode_e(aph1, z, -1, 1)
+        amp = cheb_eval_mode(an21, z, -1, 1)
+        phi = cheb_eval_mode(aph1, z, -1, 1)
     elif x <= -1:
         z = (16./(x ** 3) + 9) / 7
-        amp = cheb_eval_mode_e(an22, z, -1, 1)
-        phi = cheb_eval_mode_e(aph2, z, -1, 1)
+        amp = cheb_eval_mode(an22, z, -1, 1)
+        phi = cheb_eval_mode(aph2, z, -1, 1)
     else:
-        amp = make_r(0., 0.)
-        phi = make_r(0., 0.)
+        amp = make_r(0, 0)
+        phi = make_r(0, 0)
 
     a = amp.val + 0.3125
     p = phi.val - 0.625
@@ -386,9 +366,9 @@ def airy_Ai_deriv(x, bint threaded):
         int n = arr.size
 
     if threaded:
-        airy_p(_airy_Ai_deriv, arr, n)
+        map_dbl_p(_airy_Ai_deriv, arr, n)
     else:
-        airy_s(_airy_Ai_deriv, arr, n)
+        map_dbl_s(_airy_Ai_deriv, arr, n)
 
     return arr.reshape(np.shape(x))
 
@@ -408,8 +388,8 @@ cdef Result _airy_Ai_deriv(double x) nogil:
         return make_r(val, err)
 
     elif x < 1:
-        a = cheb_eval_mode_e(aif, x3, -1, 1)
-        p = cheb_eval_mode_e(aig, x3, -1, 1)
+        a = cheb_eval_mode(aif, x3, -1, 1)
+        p = cheb_eval_mode(aig, x3, -1, 1)
         val = x * x * (0.125 + a.val) - p.val - 0.25
         err = cm.fabs(x * x * a.err) + p.err + m.DBL_EPSILON * cm.fabs(val)
 
@@ -421,9 +401,7 @@ cdef Result _airy_Ai_deriv(double x) nogil:
         return exp_mult_err(c, 1.5 * cm.fabs(c * m.DBL_EPSILON), a.val, a.err)
 
     else:
-        with gil:
-            warnings.warn('Underflow encountered in _airy_Ai_deriv. Value x is too huge')
-        return make_r(cm.NAN, cm.NAN)
+        return make_r_nan()
 
 
 def airy_Ai_deriv_scaled(x, threaded):
@@ -435,9 +413,9 @@ def airy_Ai_deriv_scaled(x, threaded):
         int n = arr.size
 
     if threaded:
-        airy_p(_airy_Ai_deriv_scaled, arr, n)
+        map_dbl_p(_airy_Ai_deriv_scaled, arr, n)
     else:
-        airy_s(_airy_Ai_deriv_scaled, arr, n)
+        map_dbl_s(_airy_Ai_deriv_scaled, arr, n)
 
     return arr.reshape(np.shape(x))
 
@@ -457,8 +435,8 @@ cdef Result _airy_Ai_deriv_scaled(double x) nogil:
         return make_r(val, err)
 
     elif x <= 1:
-        a = cheb_eval_mode_e(aif, x3, -1, 1)
-        p = cheb_eval_mode_e(aig, x3, -1, 1)
+        a = cheb_eval_mode(aif, x3, -1, 1)
+        p = cheb_eval_mode(aig, x3, -1, 1)
         val = x * x * (0.125 + a.val) - p.val - 0.25
         err = cm.fabs(x * x * a.val) + p.err + m.DBL_EPSILON * cm.fabs(val)
 
@@ -470,9 +448,9 @@ cdef Result _airy_Ai_deriv_scaled(double x) nogil:
         return make_r(val, err)
 
     elif x <= 4:
-        a = cheb_eval_mode_e(aip1, (16. / (x * sqx) - 9) / 7, -1, 1)
+        a = cheb_eval_mode(aip1, (16. / (x * sqx) - 9) / 7, -1, 1)
     else:
-        a = cheb_eval_mode_e(aip2, 16 / (x * sqx) -1, -1, 1)
+        a = cheb_eval_mode(aip2, 16 / (x * sqx) -1, -1, 1)
 
     s = cm.sqrt(sqx)
     val = -(0.28125 + a.val) * s

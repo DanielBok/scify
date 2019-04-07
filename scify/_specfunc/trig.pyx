@@ -3,6 +3,7 @@ import numpy as np
 from libc cimport math as cm
 
 from scify cimport _machine as m
+from ._results cimport Result, make_r
 from .cheb cimport cheb_eval
 
 cdef:
@@ -36,85 +37,130 @@ cdef:
     ])
 
 
-cdef double angle_restrict_pos_err(double theta) nogil:
+cdef Result angle_restrict_pos_err(double theta) nogil:
     cdef:
+        Result res = make_r(0, 0)
         double two_pi = 2 * PI
         double y = 2 * cm.floor(theta / two_pi)
-        double r = theta - y * (2 * two_pi)
+        double r = theta - y * 2 * two_pi
+        double delta
 
     if r > two_pi:
         r -= two_pi
     elif r < 0:
         r += two_pi
 
+    res.val = r
+
     if cm.fabs(theta) > 0.0625 / m.DBL_EPSILON:
-        return cm.NAN
+        return make_r(cm.NAN, cm.NAN)
+    elif cm.fabs(theta) > 0.0625 / m.SQRT_DBL_EPSILON:
+        res.err = m.DBL_EPSILON * cm.fabs(res.val - theta)
+    else:
+        delta = cm.fabs(res.val - theta)
+        res.err = 2 * m.DBL_EPSILON * cm.fmin(delta, PI)
 
-    return r
+    return res
 
 
-cdef double cos_err(double x) nogil:
+cdef Result cos_err(const double x, const double dx) nogil:
     cdef:
+        Result res = make_r(0, 0)
         double abs_x = cm.fabs(x)
-        double val, t, y, z, sgn = 1
+        double x2, t, y, z
+        int sgn = 1
         int octant
 
     if abs_x < m.ROOT4_DBL_EPSILON:
-        return 1 - 0.5 * x * x
-    y = cm.floor(abs_x / (0.25 * PI))
-    octant = <int>(y - cm.ldexp(cm.floor(cm.ldexp(y, -3)), 3))
-
-    if octant % 2 == 1:
-        octant += 1
-        octant &= 7
-        y += 1
-
-    if octant > 3:
-        octant -= 4
-        sgn *= -1
-
-    if octant > 1:
-        sgn *= -1
-
-    z = ((abs_x - y * 7.85398125648498535156e-1) - y * 3.77489470793079817668e-8) - y * 2.69515142907905952645e-15
-
-    t = 8 * cm.fabs(z) / PI - 1
-    if octant == 0:
-        val = 1 - 0.5 * z * z * (1 - z * z * cheb_eval(cos_constants, t))
+        x2 = x * x
+        res.val = 1 - 0.5 * x2
+        res.err = cm.fabs(x2 * x2 / 12)
     else:
-        val = z * (1 + z * z * cheb_eval(sin_constants, t))
+        y = cm.floor(abs_x / (0.25 * PI))
+        octant = <int>(y - cm.ldexp(cm.floor(cm.ldexp(y, -3)), 3))
 
-    return val * sgn
+        if octant % 2 == 1:
+            octant += 1
+            octant &= 7
+            y += 1
+
+        if octant > 3:
+            octant -= 4
+            sgn *= -1
+
+        if octant > 1:
+            sgn *= -1
+
+        z = abs_x - y * 7.85398125648498535156e-1 - y * 3.77489470793079817668e-8 - y * 2.69515142907905952645e-15
+
+        t = 8 * cm.fabs(z) / PI - 1
+        if octant == 0:
+            res.val = 1 - 0.5 * z * z * (1 - z * z * cheb_eval(cos_constants, t, -1, 1).val)
+        else:
+            res.val = z * (1 + z * z * cheb_eval(sin_constants, t, -1, 1).val)
+
+        res.val *= sgn
+
+        z = cm.fabs(res.val)
+        if abs_x > 1/m.DBL_EPSILON:
+            res.err = z
+        elif abs_x > 100/m.SQRT_DBL_EPSILON:
+            res.err = 2.0 * abs_x * m.DBL_EPSILON * z
+        elif abs_x > 0.1/m.SQRT_DBL_EPSILON:
+            res.err = 2.0 * m.SQRT_DBL_EPSILON * z
+        else:
+            res.err = 2.0 * m.DBL_EPSILON * z
+
+    res.err += cm.fabs(cm.sin(x) * dx) + m.DBL_EPSILON * res.val
+
+    return res
 
 
-cdef double sin_err(double x) nogil:
+cdef Result sin_err(const double x, const double dx) nogil:
     cdef:
+        Result res = make_r(0, 0)
         double abs_x = cm.fabs(x)
-        double sgn_x = m.sign(x)
-        double val, t, y, z
+        double x2, t, y, z
+        int sgn = m.sign(x)
         int octant
 
     if abs_x < m.ROOT4_DBL_EPSILON:
-        return x * (1 - x * x / 6.)
-
-    y = cm.floor(abs_x / (0.25 * PI))
-    octant = <int>(y - cm.ldexp(cm.floor(cm.ldexp(y, -3)), 3))
-
-    if octant % 2 == 1:
-        octant += 1
-        octant &= 7
-        y += 1
-
-    if octant > 3:
-        octant -= 4
-        sgn_x *= -1
-
-    z = ((abs_x - y * 7.85398125648498535156e-1) - y * 3.77489470793079817668e-8) - y * 2.69515142907905952645e-15
-
-    t = 8 * cm.fabs(z) / PI - 1
-    if octant == 0:
-        val = z * (1 + z * z * cheb_eval(sin_constants, t))
+        x2 = x * x
+        res.val = x * (1 - x * x / 6.)
+        res.err = cm.fabs(x * x2 * x2 / 100.0)
     else:
-        val = 1 - 0.5 * z * z * (1 - z * z * cheb_eval(cos_constants, t))
+        y = cm.floor(abs_x / (0.25 * PI))
+        octant = <int>(y - cm.ldexp(cm.floor(cm.ldexp(y, -3)), 3))
 
-    return val * sgn_x
+        if octant % 2 == 1:
+            octant += 1
+            octant &= 7
+            y += 1
+
+        if octant > 3:
+            octant -= 4
+            sgn *= -1
+
+        z = abs_x - y * 7.85398125648498535156e-1 - y * 3.77489470793079817668e-8 - y * 2.69515142907905952645e-15
+
+        t = 8 * cm.fabs(z) / PI - 1
+        if octant == 0:
+            res.val = z * (1 + z * z * cheb_eval(sin_constants, t, -1, 1).val)
+        else:
+            res.val = 1 - 0.5 * z * z * (1 - z * z * cheb_eval(cos_constants, t, -1, 1).val)
+
+        res.val *= sgn
+
+        z = cm.fabs(res.val)
+        if abs_x > 1/m.DBL_EPSILON:
+            res.err = z
+        elif abs_x > 100/m.SQRT_DBL_EPSILON:
+            res.err = 2.0 * abs_x * m.DBL_EPSILON * z
+        elif abs_x > 0.1/m.SQRT_DBL_EPSILON:
+            res.err = 2.0 * m.SQRT_DBL_EPSILON * z
+        else:
+            res.err = 2.0 * m.DBL_EPSILON * z
+
+    res.err += cm.fabs(cm.cos(x) * dx) + m.DBL_EPSILON * res.val
+
+    return res

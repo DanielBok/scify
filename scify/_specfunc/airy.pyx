@@ -1,29 +1,12 @@
-from cython.parallel import prange
 import numpy as np
 
 from libc cimport math as cm
 cimport numpy as cnp
 
 from scify cimport _machine as m
+from ._results cimport Result, make_r, make_r_0, make_r_nan, map_dbl_p, map_dbl_s
 from .cheb cimport cheb_eval_mode
 from .trig cimport cos_err, sin_err
-
-
-ctypedef double (*DFunc) (double) nogil
-
-
-cdef void airy_p(DFunc f, double[::1] x, int size) nogil:
-    """Parallel"""
-    cdef int i
-    for i in prange(size, nogil=True):
-        x[i] = f(x[i])
-
-
-cdef void airy_s(DFunc f, double[::1] x, int size) nogil:
-    """Single Thread"""
-    cdef int i
-    for i in range(size):
-        x[i] = f(x[i])
 
 
 cdef:
@@ -337,200 +320,262 @@ cdef:
     ])
 
 
-cdef (double, double) airy_mod_phase(double x) nogil:
+cdef (Result, Result) airy_mod_phase(double x) nogil:
     """airy function for x < -1"""
     cdef:
-        double z, mod = 0, phase = 0
+        Result res_m, res_p
+        double z, m_, p_, mr, mp
         double sqx = cm.sqrt(-x)
 
     if x < -2:
         z = 16. / (x ** 3) + 1
-        mod = cheb_eval_mode(a1, z, -1, 1)
-        phase = cheb_eval_mode(a2, z, -1, 1)
+        res_m = cheb_eval_mode(a1, z, -1, 1)
+        res_p = cheb_eval_mode(a2, z, -1, 1)
     elif x <= -1:
         z = (16. / (x ** 3) + 9) / 7
-        mod = cheb_eval_mode(b1, z, -1, 1)
-        phase = cheb_eval_mode(b2, z, -1, 1)
+        res_m = cheb_eval_mode(b1, z, -1, 1)
+        res_p = cheb_eval_mode(b2, z, -1, 1)
+    else:
+        res_m, res_p = make_r_0(), make_r_0()
 
-    mod += 0.3125
-    phase -= 0.625
+    m_ = 0.3125 + res_m.val
+    p_ = -0.625 + res_p.val
+    mr = cm.sqrt(m_ / sqx)
+    mp = m.M_PI_4 - x * sqx * p_
 
-    return cm.sqrt(mod / sqx), m.M_PI_4 - x * sqx * phase
+    return (
+        make_r(mr, cm.fabs(mr) * m.DBL_EPSILON + cm.fabs(res_m.err / res_m.val)),
+        make_r(mp, cm.fabs(mp) * m.DBL_EPSILON + cm.fabs(res_p.err / res_p.val))
+    )
 
 
-cdef double airy_aie(double x) nogil:
+cdef Result airy_aie(double x) nogil:
     """airy function of the first kind for x >= 1"""
     cdef:
         double sqx = cm.sqrt(x)
-        double z = 2 / (x * sqx) - 1
+        double z = 2. / (x * sqx) - 1
+        double y = cm.sqrt(sqx)
+        Result res = cheb_eval_mode(aie, z, -1, 1)
+        double val = (0.28125 + res.val) / y
 
-    return (0.28125 + cheb_eval_mode(aie, z, -1, 1)) / cm.sqrt(sqx)
+    return make_r(val, res.err / y + m.DBL_EPSILON * cm.fabs(val))
 
 
 def airy_Ai(x, bint threaded):
     if np.isscalar(x):
-        return _airy_Ai(x)
+        return _airy_Ai(x).val
 
     cdef:
         cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
         int n = arr.size
 
     if threaded:
-        airy_p(_airy_Ai, arr, n)
+        map_dbl_p(_airy_Ai, arr, n)
     else:
-        airy_s(_airy_Ai, arr, n)
+        map_dbl_s(_airy_Ai, arr, n)
 
     return arr.reshape(np.shape(x))
 
 
-cdef double _airy_Ai(double x) nogil:
+cdef Result _airy_Ai(double x) nogil:
     cdef:
-        double mod, theta, z
+        Result res = make_r_0()
+        Result mod, theta, res_cos
+        double s, x32, z
 
     if x < -1:
         mod, theta = airy_mod_phase(x)
-        return mod * cos_err(theta)
+        res_cos = cos_err(theta.val, theta.err)
+        res.val = mod.val * res_cos.val
+        res.err = cm.fabs(mod.val * res_cos.err) + cm.fabs(res_cos.val * mod.err)
+
     elif x <= 1:
         z = x ** 3
         mod = cheb_eval_mode(aif, z, -1, 1)
         theta = cheb_eval_mode(aig, z, -1, 1)
-        return 0.375 + (mod - x * (0.25 + theta))
+        res.val = 0.375 + (mod.val - x * (0.25 + theta.val))
+        res.err = mod.err + cm.fabs(x * theta.err)
+
     else:
-        z = airy_aie(x) * cm.exp(-2 * x * cm.sqrt(x) / 3)
-        if cm.fabs(z) < m.DBL_MIN:
-            with gil:
-                raise ValueError("Underflow encountered")
-        return z
+        x32 = x ** 1.5
+        s = cm.exp(-2.0 * x32 / 3.0)
+        mod = airy_aie(x)
+        res.val = mod.val * s
+        res.err = mod.err * s + res.val * x32 * m.DBL_EPSILON
+
+        if cm.fabs(res.val) < m.DBL_MIN:
+            return make_r_nan()
+
+    res.err += m.DBL_EPSILON * cm.fabs(res.val)
+    return res
 
 
 def airy_Ai_scaled(x, bint threaded):
     if np.isscalar(x):
-        return _airy_Ai_scaled(x)
+        return _airy_Ai_scaled(x).val
 
     cdef:
         cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
         int n = arr.size
 
     if threaded:
-        airy_p(_airy_Ai_scaled, arr, n)
+        map_dbl_p(_airy_Ai_scaled, arr, n)
     else:
-        airy_s(_airy_Ai_scaled, arr, n)
+        map_dbl_s(_airy_Ai_scaled, arr, n)
 
     return arr.reshape(np.shape(x))
 
 
-cdef double _airy_Ai_scaled(double x) nogil:
+cdef Result _airy_Ai_scaled(double x) nogil:
     cdef:
-        double mod, theta, z, val, scale
+        Result res = make_r_0()
+        Result mod, theta, res_cos
+        double z, s
 
     if x < -1:
         mod, theta = airy_mod_phase(x)
-        return mod * cos_err(theta)
+        res_cos = cos_err(theta.val, theta.err)
+        res.val = mod.val * res_cos.val
+        res.err = cm.fabs(mod.val * res_cos.err) + cm.fabs(res_cos.val * mod.err) + m.DBL_EPSILON * cm.fabs(res.val)
     elif x < 1:
         z = x ** 3
         mod = cheb_eval_mode(aif, z, -1, 1)
         theta = cheb_eval_mode(aig, z, -1, 1)
-        val = 0.375 + (mod - x * (0.25 + theta))
+        res.val = 0.375 + (mod.val - x * (0.25 + theta.val))
+        res.err = mod.err + cm.fabs(x * theta.err) + m.DBL_EPSILON * cm.fabs(res.val)
 
         if x > 0:
-            return val * cm.exp(2. / 3 * cm.sqrt(z))
-        return val
+            s = cm.exp(2. / 3 * cm.sqrt(z))
+            res.val *= s
+            res.err *= s
     else:
-        return airy_aie(x)
+        res = airy_aie(x)
+    return res
 
 
-cdef double airy_bie(double x) nogil:
+cdef Result airy_bie(double x) nogil:
     """airy function of the second kind for x >= 2"""
     cdef:
         double sqx = cm.sqrt(x)
         double y = cm.sqrt(sqx)
-        double z
+        double z, val
+        Result res
 
     if x < 4:
         z = 8.7506905708484345 / (x * sqx) -2.0938363213560543
-        return (0.625 + cheb_eval_mode(bip, z, -1, 1)) / y
+        res = cheb_eval_mode(bip, z, -1, 1)
     else:
-        z = 16 / (x * sqx) - 1
-        return (0.625 + cheb_eval_mode(bip2, z, -1, 1)) / y
+        z = 16. / (x * sqx) - 1
+        res = cheb_eval_mode(bip2, z, -1, 1)
+
+    val = (0.625 + res.val) / y
+    return make_r(val, res.err / y + m.DBL_EPSILON * cm.fabs(val))
 
 
 def airy_Bi(x, bint threaded):
     if np.isscalar(x):
-        return _airy_Bi(x)
+        return _airy_Bi(x).val
 
     cdef:
         cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
         int n = arr.size
 
     if threaded:
-        airy_p(_airy_Bi, arr, n)
+        map_dbl_p(_airy_Bi, arr, n)
     else:
-        airy_s(_airy_Bi, arr, n)
+        map_dbl_s(_airy_Bi, arr, n)
 
     return arr.reshape(np.shape(x))
 
 
-cdef double _airy_Bi(double x) nogil:
+cdef Result _airy_Bi(double x) nogil:
     cdef:
-        double mod, theta, z, y, s
+        Result res = make_r_0()
+        Result mod, theta, res_sin
+        double s, z
 
     if x < -1:
         mod, theta = airy_mod_phase(x)
-        return mod * sin_err(theta)
+        res_sin = sin_err(theta.val, theta.err)
+        res.val = mod.val * res_sin.val
+        res.err = cm.fabs(mod.val * res_sin.err) + cm.fabs(res_sin.val * mod.err)
     elif x < 1:
         z = x ** 3
         mod = cheb_eval_mode(bif, z, -1, 1)
         theta = cheb_eval_mode(big, z, -1, 1)
-        return 0.625 + mod + x * (0.4375 + theta)
+        res.val = 0.625 + mod.val + x * (0.4375 + theta.val)
+        res.err = mod.err + cm.fabs(x * theta.err)
+
     elif x <= 2:
         z = (2. * x ** 3 - 9) / 7
         mod = cheb_eval_mode(bif2, z, -1, 1)
         theta = cheb_eval_mode(big2, z, -1, 1)
-        return 1.125 + mod + x * (0.625 + theta)
+        res.val = 1.125 + mod.val + x * (0.625 + theta.val)
+        res.err = mod.err + cm.fabs(x * theta.err)
     else:
-        y = 2 * x * cm.sqrt(x) / 3
+        z = 2. / 3 * x ** 1.5
+        s = cm.exp(z)
 
-        if y > m.LOG_DBL_MAX - 1:
-            with gil:
-                raise ValueError("overflow in airy_Bi")
+        if z > m.LOG_DBL_MAX - 1:
+            return make_r_nan()
 
-        return airy_bie(x) * cm.exp(y)
+        mod = airy_bie(x)
+        res.val = mod.val * s
+        res.err = mod.err * s + cm.fabs(1.5 * z * m.DBL_EPSILON * res.val)
 
+    res.err += m.DBL_EPSILON * cm.fabs(res.val)
+    return res
 
 def airy_Bi_scaled(x, bint threaded):
     if np.isscalar(x):
-        return _airy_Bi_scaled(x)
+        return _airy_Bi_scaled(x).val
 
     cdef:
         cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
         int n = arr.size
 
     if threaded:
-        airy_p(_airy_Bi_scaled, arr, n)
+        map_dbl_p(_airy_Bi_scaled, arr, n)
     else:
-        airy_s(_airy_Bi_scaled, arr, n)
+        map_dbl_s(_airy_Bi_scaled, arr, n)
 
     return arr.reshape(np.shape(x))
 
 
-cdef double _airy_Bi_scaled(double x) nogil:
+cdef Result _airy_Bi_scaled(double x) nogil:
     cdef:
-        double mod, theta, z, s
+        Result res = make_r_0()
+        Result mod, theta, res_sin
+        double s, z
 
     if x < -1:
         mod, theta = airy_mod_phase(x)
-        return mod * sin_err(theta)
+        res_sin = sin_err(theta.val, theta.err)
+        res.val = mod.val * res_sin.val
+        res.err = cm.fabs(mod.val * res_sin.err) + cm.fabs(res_sin.val * mod.err) + m.DBL_EPSILON * cm.fabs(res.val)
     elif x < 1:
         z = x ** 3
-        s = 1 if x <= 0 else cm.exp(-2./3 * cm.sqrt(z))
         mod = cheb_eval_mode(bif, z, -1, 1)
         theta = cheb_eval_mode(big, z, -1, 1)
-        return s * (0.625 + mod + x * (0.4375 + theta))
+        res.val = 0.625 + mod.val + x * (0.4375 + theta.val)
+        res.err = mod.err + cm.fabs(x * theta.err) + m.DBL_EPSILON * cm.fabs(res.val)
+
+        if x > 0:
+            s = cm.exp(-2./3 * cm.sqrt(z))
+            res.val *= s
+            res.err *= s
+
     elif x <= 2:
-        z = (2. * x ** 3 - 9) / 7
-        s = cm.exp(-2./3 * x ** 1.5)
+        z = x ** 3
+        s = cm.exp(-2./3 * cm.sqrt(z))
+        z = (2. * z - 9) / 7
+
         mod = cheb_eval_mode(bif2, z, -1, 1)
         theta = cheb_eval_mode(big2, z, -1, 1)
-        return s * (1.125 + mod + x * (0.625 + theta))
+
+        res.val = s * (1.125 + mod.val + x * (0.625 + theta.val))
+        res.err = s * (mod.err + cm.fabs(x * theta.err)) + m.DBL_EPSILON * cm.fabs(res.val)
     else:
-        return airy_bie(x)
+        res = airy_bie(x)
+
+    return res

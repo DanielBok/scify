@@ -1,4 +1,6 @@
+from ._results cimport Result
+
 cdef:
-    double angle_restrict_pos_err(double) nogil
-    double cos_err(double) nogil
-    double sin_err(double) nogil
+    Result angle_restrict_pos_err(double) nogil
+    Result cos_err(const double, const double) nogil
+    Result sin_err(const double, const double) nogil
