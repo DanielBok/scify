@@ -1,8 +1,8 @@
-cimport cython
 from cython.parallel import prange
-from libc cimport math as cm
-
 import numpy as np
+
+cimport cython
+from libc cimport math as cm
 
 from scify cimport _machine as m
 from .cheb cimport cheb_eval
@@ -53,8 +53,7 @@ def clausen(x):
     """
     cdef:
         double[::1] arr
-        int i
-        size_t n
+        long i, n
 
     if np.isscalar(x):
         return _clausen(x)
@@ -73,7 +72,6 @@ cdef double _clausen(double x) nogil:
     cdef:
         double x_cut = m.M_PI * m.DBL_EPSILON
         double sgn = 1.0
-        double t
 
     if x < 0:
         x = -x

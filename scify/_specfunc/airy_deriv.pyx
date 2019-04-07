@@ -1,10 +1,11 @@
 import warnings
 
+from cython.parallel import prange
+import numpy as np
+
 cimport cython
 from libc cimport math as cm
 
-from cython.parallel import prange
-import numpy as np
 
 from scify cimport _machine as m
 from ._results cimport Result, make_r
@@ -378,9 +379,8 @@ def airy_Ai_deriv(x):
         Derivative values from the Airy function
     """
     cdef:
-        double[:] arr
-        int i
-        size_t n
+        double[::1] arr
+        long i, n
 
     if np.isscalar(x):
         return _airy_Ai_deriv(x).val
@@ -444,10 +444,9 @@ def airy_Ai_deriv_scaled(x):
         Derivative values from the Airy function
     """
     cdef:
-        double[:] arr
+        double[::1] arr
+        long i, n
         double err
-        int i
-        size_t n
 
     if np.isscalar(x):
         return _airy_Ai_deriv_scaled(x).val

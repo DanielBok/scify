@@ -1,7 +1,8 @@
-cimport cython
-from libc cimport math as cm
 from cython.parallel import prange
 import numpy as np
+
+cimport cython
+from libc cimport math as cm
 
 from scify cimport _machine as m
 from .cheb cimport cheb_eval
@@ -130,8 +131,7 @@ cdef:
 def debye_1(x):
     cdef:
         double[::1] arr
-        int i
-        size_t n
+        long i, n
 
     if np.isscalar(x):
         return _debye_1(x)
@@ -178,8 +178,7 @@ cdef double _debye_1(double x) nogil:
 def debye_2(x):
     cdef:
         double[::1] arr
-        int i
-        size_t n
+        long i, n
 
     if np.isscalar(x):
         return _debye_2(x)
@@ -230,8 +229,7 @@ cdef double _debye_2(double x) nogil:
 def debye_3(x):
     cdef:
         double[::1] arr
-        int i
-        size_t n
+        long i, n
 
     if np.isscalar(x):
         return _debye_3(x)
@@ -281,8 +279,7 @@ cdef double _debye_3(double x) nogil:
 def debye_4(x):
     cdef:
         double[::1] arr
-        int i
-        size_t n
+        long i, n
 
     if np.isscalar(x):
         return _debye_4(x)
@@ -331,8 +328,7 @@ cdef double _debye_4(double x) nogil:
 def debye_5(x):
     cdef:
         double[::1] arr
-        int i
-        size_t n
+        long i, n
 
     if np.isscalar(x):
         return _debye_5(x)
@@ -381,8 +377,7 @@ cdef double _debye_5(double x) nogil:
 def debye_6(x):
     cdef:
         double[::1] arr
-        int i
-        size_t n
+        long i, n
 
     if np.isscalar(x):
         return _debye_6(x)

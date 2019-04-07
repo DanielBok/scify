@@ -1,7 +1,10 @@
 import os
+import re
 import sys
 
 from setuptools import setup, find_packages, Extension
+
+import numpy as np
 
 ENV = 'DEV'
 argv = sys.argv
@@ -32,6 +35,12 @@ except ImportError:
 
 
 def build_extensions():
+    macros = [('NPY_NO_DEPRECATED_API', '1'),
+              ('NPY_1_7_API_VERSION', '1')]
+
+    if IS_DEV_MODE:
+        macros.append(('CYTHON_TRACE', '1'))
+
     extensions = []
     for root, _, files in os.walk("scify"):
         path_parts = os.path.normcase(root).split(os.sep)
@@ -40,10 +49,22 @@ def build_extensions():
 
             if ext == '.pyx':
                 module_path = '.'.join([*path_parts, fn])
-                pyx_c_file_path = os.path.join(*path_parts, fn + ('.pyx' if USE_CYTHON else '.c'))
-                extensions.append(Extension(module_path,
-                                            [pyx_c_file_path],
-                                            language='c'))
+                _fp = os.path.join(*path_parts, fn)
+                pyx_c_file_path = _fp + ('.pyx' if USE_CYTHON else '.c')
+
+                include_dirs = []
+                with open(_fp + ext) as f:
+                    if re.search(r'^cimport numpy as c?np$', f.read(), re.MULTILINE) is not None:
+                        include_dirs.append(np.get_include())
+
+                extensions.append(Extension(
+                    module_path,
+                    [pyx_c_file_path],
+                    language='c',
+                    extra_compile_args=['/openmp'],
+                    include_dirs=include_dirs,
+                    define_macros=macros,
+                ))
 
     directives = {'language_level': '3', 'linetrace': IS_DEV_MODE}
     return cythonize(extensions, compiler_directives=directives)

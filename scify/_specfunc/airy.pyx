@@ -1,8 +1,8 @@
-cimport cython
-from libc cimport math as cm
-
 from cython.parallel import prange
 import numpy as np
+
+cimport cython
+from libc cimport math as cm
 
 from scify cimport _machine as m
 from .cheb cimport cheb_eval_mode
@@ -378,9 +378,8 @@ def airy_Ai(x):
         Values from the Airy function
     """
     cdef:
-        double[:] arr
-        int i
-        size_t n
+        double[::1] arr
+        long i, n
 
     if np.isscalar(x):
         return _airy_Ai(x)
@@ -444,9 +443,8 @@ def airy_Ai_scaled(x):
         Values from the Airy function
     """
     cdef:
-        double[:] arr
-        int i
-        size_t n
+        double[::1] arr
+        long i, n
 
     if np.isscalar(x):
         return _airy_Ai_scaled(x)
@@ -521,9 +519,8 @@ def airy_Bi(x):
         Values from the Airy function
     """
     cdef:
-        double[:] arr
-        int i
-        size_t n
+        double[::1] arr
+        long i, n
 
     if np.isscalar(x):
         return _airy_Bi(x)
@@ -595,9 +592,8 @@ def airy_Bi_scaled(x):
         Values from the Airy function
     """
     cdef:
-        double[:] arr
-        int i
-        size_t n
+        double[::1] arr
+        long i, n
 
     if np.isscalar(x):
         return _airy_Bi_scaled(x)

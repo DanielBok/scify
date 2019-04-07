@@ -1,8 +1,9 @@
 import numpy as np
 from cython.parallel import prange
 
-import cython
+cimport cython
 from libc cimport math as cm
+cimport numpy as cnp
 
 from scify cimport _machine as m
 from .clausen cimport _clausen
@@ -32,20 +33,17 @@ def dilog(x):
     {array_like, scalar}
         Real Dilog output
     """
-    cdef:
-        double[:] arr
-        int i
-        size_t n
-
     if np.isscalar(x):
         return _dilog(x)
 
-    arr = np.ravel(x)
-    n = len(arr)
-    for i in prange(n, nogil=True):
+    cdef:
+        cnp.ndarray[cnp.float64_t, ndim=1] arr = np.ravel(x)
+        long i, n = x.size
+
+    for i in range(n):
         arr[i] = _dilog(arr[i])
 
-    return np.reshape(arr, np.shape(x))
+    return arr.reshape(np.shape(x))
 
 
 cdef double _dilog(double x) nogil:
@@ -62,12 +60,12 @@ cdef double _dilog(double x) nogil:
 
 
 @cython.cdivision(True)
+@cython.nonecheck(False)
 cdef double dilog_xge0(double x) nogil:
     """Calculates dilog for real :math:`x \geq 0"""
     cdef:
         double log_x = cm.log(x)
         double t1, t2, t3
-        double eps, lne
         int i
 
     if x > 2:
@@ -113,6 +111,7 @@ cdef double dilog_xge0(double x) nogil:
 
 
 @cython.cdivision(True)
+@cython.nonecheck(False)
 cdef double dilog_series_1(double x) nogil:
     cdef:
         double rk2, term = x, total = x
@@ -126,12 +125,13 @@ cdef double dilog_series_1(double x) nogil:
         if cm.fabs(term / total) < m.DBL_EPSILON:
             return total
 
-    with gil:
-        raise StopIteration('Max iteration hit. dilog_series_1 could not converge')
+    # Max iteration hit. dilog_series_1 could not converge
+    return cm.NAN
 
 
 
 @cython.cdivision(True)
+@cython.nonecheck(False)
 cdef double dilog_series_2(double x) nogil:
     cdef:
         double ds, total = 0.5 * x, y = x, z = 0.0
@@ -173,24 +173,21 @@ def dilog_complex(r, theta):
     {array_like, scalar}
         Complex Dilog output
     """
-    cdef:
-        double[:] r_vec, theta_vec
-        size_t n
-        int i
-
     if np.isscalar(r) and np.isscalar(theta):
         return complex(*_dilog_complex(r, theta))
 
-    assert np.shape(r) == np.shape(theta)
+    cdef tuple shape = np.shape(r)
+    assert shape == np.shape(theta), "Radius of complex vector must have same shape as the angled part"
 
-    r_vec = np.ravel(r)
-    theta_vec = np.ravel(theta)
-    n = len(r_vec)
+    cdef:
+        cnp.ndarray[cnp.float64_t, ndim=1] r_vec = np.ravel(r)
+        cnp.ndarray[cnp.float64_t, ndim=1] theta_vec = np.ravel(theta)
+        long i, n = len(r_vec)
 
     for i in prange(n, nogil=True):
         r_vec[i], theta_vec[i] = _dilog_complex(r_vec[i], theta_vec[i])
 
-    return np.reshape([complex(r_vec[i], theta_vec[i]) for i in range(n)], np.shape(r))
+    return (r_vec + 1j * theta_vec).reshape(shape)
 
 
 @cython.cdivision(True)
@@ -229,6 +226,7 @@ cdef (double, double) _dilog_complex(double r, double theta) nogil:
         return real, imag
 
 
+@cython.nonecheck(False)
 cdef (double, double) dilogc_fundamental(double r, double x, double y) nogil:
     if r > 0.98:
         return dilogc_series_3(r, x, y)
@@ -354,7 +352,6 @@ cdef (double, double) dilogc_series_3(double r, double x, double y) nogil:
     return sum_re, sum_im
 
 
-@cython.boundscheck(False)
 @cython.cdivision(True)
 @cython.nonecheck(False)
 cdef (double, double) series_2_c(double r, double x, double y) nogil:

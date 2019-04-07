@@ -1,7 +1,7 @@
+import numpy as np
+
 cimport cython
 from libc cimport math as cm
-
-import numpy as np
 
 from scify cimport _machine as m
 from .cheb cimport cheb_eval
