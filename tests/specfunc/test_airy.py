@@ -172,3 +172,27 @@ def test_airy_Bi(x, exp):
 ])
 def test_airy_Bi_scaled(x, exp):
     assert_almost_equal(a.airy_Bi_scaled(x), exp)
+
+
+def test_benchmark_airy_Ai(benchmark, data):
+    benchmark(a.airy_Ai, data, threaded=False)
+
+
+def test_benchmark_airy_Ai_scaled(benchmark, data):
+    benchmark(a.airy_Ai_scaled, data, threaded=False)
+
+
+def test_benchmark_airy_Ai_deriv(benchmark, data):
+    benchmark(a.airy_Ai_deriv, data, threaded=False)
+
+
+def test_benchmark_airy_Ai_deriv_scaled(benchmark, data):
+    benchmark(a.airy_Ai_deriv_scaled, data, threaded=False)
+
+
+def test_benchmark_airy_Bi(benchmark, data):
+    benchmark(a.airy_Bi, data, threaded=False)
+
+
+def test_benchmark_airy_Bi_scaled(benchmark, data):
+    benchmark(a.airy_Bi_scaled, data, threaded=False)

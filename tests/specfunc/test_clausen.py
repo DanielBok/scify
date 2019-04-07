@@ -5,7 +5,7 @@ from numpy.testing import assert_almost_equal
 from scify.specfunc.clausen import clausen
 
 
-@pytest.mark.parametrize('x, exp, dp', [
+@pytest.mark.parametrize('x, exp', [
     (np.arange(-2, 4.1, 0.4), [-0.727146050863279,
                                -0.905633219234944,
                                -1.00538981376486,
@@ -22,9 +22,13 @@ from scify.specfunc.clausen import clausen
                                -0.0404765846184049,
                                -0.313708773770116,
                                -0.56814394442987
-                               ], 6),
-    (0.25, 0.596790672033802, 6),
-    (1e-16, 3.78413614879047e-15, 20)
+                               ]),
+    (0.25, 0.596790672033802),
+    (1e-16, 3.78413614879047e-15)
 ])
-def test_clausen(x, exp, dp):
-    assert_almost_equal(clausen(x), exp, dp)
+def test_clausen(x, exp):
+    assert_almost_equal(clausen(x), exp)
+
+
+def test_benchmark_clausen(benchmark, data):
+    benchmark(clausen, data, threaded=False)

@@ -73,3 +73,8 @@ VALUES = [-1, 0, 2.5, 3.5, 4, 6.7, 15.8, 36, 104.5, 551.3, 702.6, 1025.6, 6712.4
 def test_debye(order, expected):
     res = debye_n(VALUES, order)
     assert_array_almost_equal(res, expected, 5)
+
+
+@pytest.mark.parametrize('order', [1, 2, 3, 4, 5, 6])
+def test_benchmark_debye(benchmark, data, order):
+    benchmark(debye_n, data, order, threaded=False)

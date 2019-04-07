@@ -38,7 +38,7 @@ def test_dilog(x, exp):
     (1.4 + 0.6j, 1.32883448711453 + 1.53499183728498j),
 ])
 @pytest.mark.filterwarnings('ignore:invalid value encountered in log:RuntimeWarning')
-def test_diog_complex(x, exp):
+def test_dilog_complex(x, exp):
     numbers = dilog_complex(x)
 
     if isinstance(x, (complex, float, int)):
@@ -56,3 +56,11 @@ def test_diog_complex(x, exp):
 
     assert_array_almost_equal(re, t_re)
     assert_array_almost_equal(im, t_im)
+
+
+def test_benchmark_dilog(benchmark, data):
+    benchmark(dilog, data, threaded=False)
+
+
+def test_benchmark_dilog_complex(benchmark, complex_data):
+    benchmark(dilog_complex, complex_data, threaded=False)

@@ -31,6 +31,9 @@ COMPILER = msvc
 help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
+benchmark:
+	python -m pytest tests/ -k "benchmark"
+
 clean: clean-build clean-pyc clean-cython clean-test ## remove all build, test, coverage and Python artifacts
 
 clean-build: ## remove build artifacts
@@ -55,6 +58,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -f .coverage
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
+	find . -name '.benchmarks' -exec rm -fr {} +
 
 lint: ## check style with flake8
 	flake8 scify tests
