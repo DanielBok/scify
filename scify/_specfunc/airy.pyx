@@ -322,6 +322,7 @@ cdef:
 
 
 @cython.cdivision(True)
+@cython.nonecheck(False)
 cdef (double, double) airy_mod_phase(double x) nogil:
     """airy function for x < -1"""
     cdef:

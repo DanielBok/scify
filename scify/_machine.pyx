@@ -1,6 +1,3 @@
-cimport cython
-
-
 cdef:
     double DBL_EPSILON = 2.220446049250313e-16
     double SQRT_DBL_EPSILON = 1.4901161193847656e-08
