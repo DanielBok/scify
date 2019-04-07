@@ -36,7 +36,6 @@ def test_dilog(x, exp):
     # Case 4
     (1.4 + 0.6j, 1.32883448711453 + 1.53499183728498j),
 ])
-@pytest.mark.filterwarnings('ignore:invalid value encountered in log:RuntimeWarning')
 def test_dilog_complex(x, exp):
     numbers = dilog_complex(x)
 
