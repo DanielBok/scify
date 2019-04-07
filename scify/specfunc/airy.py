@@ -1,4 +1,5 @@
 from .._specfunc import airy as a
+from .._specfunc import airy_deriv as d
 
 
 def airy_Ai(x):
@@ -22,6 +23,23 @@ def airy_Ai(x):
         Values from the Airy function
     """
     return a.airy_Ai(x)
+
+
+def airy_Ai_deriv(x):
+    """
+    Compute the derivative of the Airy function the first kind
+
+    Parameters
+    ----------
+    x: {array_like, scalar}
+        Numerical vector
+
+    Returns
+    -------
+    array_like or scalar
+        Derivative values from the Airy function
+    """
+    return d.airy_Ai_deriv(x)
 
 
 def airy_Ai_scaled(x):
@@ -52,6 +70,23 @@ def airy_Ai_scaled(x):
         Values from the Airy function
     """
     return a.airy_Ai_scaled(x)
+
+
+def airy_Ai_deriv_scaled(x):
+    """
+    Compute the scaled derivative of the Airy function the first kind
+
+    Parameters
+    ----------
+    x: {array_like, scalar}
+        Numerical vector
+
+    Returns
+    -------
+    array_like or scalar
+        Derivative values from the Airy function
+    """
+    return d.airy_Ai_deriv_scaled(x)
 
 
 def airy_Bi(x):
