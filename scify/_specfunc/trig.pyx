@@ -1,12 +1,14 @@
 cimport cython
 from libc cimport math as cm
 
+import numpy as np
+
 from scify cimport _machine as m
 from .cheb cimport cheb_eval
 
 cdef:
     double PI = m.M_PI
-    double* cos_constants = [
+    double[::1] cos_constants = np.array([
         0.165391825637921473505668118136,
         -0.00084852883845000173671196530195,
         -0.000210086507222940730213625768083,
@@ -18,8 +20,8 @@ cdef:
         1.77126739876261435667156490461e-14,
         -7.6896421502815579078577263149e-17,
         -3.7363121133079412079201377318e-18
-    ]
-    double* sin_constants = [
+    ])
+    double[::1] sin_constants = np.array([
         -0.3295190160663511504173,
         0.0025374284671667991990,
         0.0006261928782647355874,
@@ -32,7 +34,7 @@ cdef:
         5.3701981409132410797062e-16,
         2.5984137983099020336115e-17,
         -1.1821555255364833468288e-19
-    ]
+    ])
 
 @cython.cdivision(True)
 @cython.nonecheck(False)
@@ -81,9 +83,9 @@ cdef double cos_err(double x) nogil:
 
     t = 8 * cm.fabs(z) / PI - 1
     if octant == 0:
-        val = 1 - 0.5 * z * z * (1 - z * z * cheb_eval(cos_constants, t, 11))
+        val = 1 - 0.5 * z * z * (1 - z * z * cheb_eval(cos_constants, t))
     else:
-        val = z * (1 + z * z * cheb_eval(sin_constants, t, 12))
+        val = z * (1 + z * z * cheb_eval(sin_constants, t))
 
     return val * sgn
 
@@ -115,8 +117,8 @@ cdef double sin_err(double x) nogil:
 
     t = 8 * cm.fabs(z) / PI - 1
     if octant == 0:
-        val = z * (1 + z * z * cheb_eval(sin_constants, t, 12))
+        val = z * (1 + z * z * cheb_eval(sin_constants, t))
     else:
-        val = 1 - 0.5 * z * z * (1 - z * z * cheb_eval(cos_constants, t, 11))
+        val = 1 - 0.5 * z * z * (1 - z * z * cheb_eval(cos_constants, t))
 
     return val * sgn_x

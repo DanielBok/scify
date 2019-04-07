@@ -7,6 +7,124 @@ from scify cimport _machine as m
 from .cheb cimport cheb_eval
 
 
+cdef:
+    double[::1] db1 = np.array([
+        2.4006597190381410194,
+        0.1937213042189360089,
+        -0.62329124554895770e-02,
+        0.3511174770206480e-03,
+        -0.228222466701231e-04,
+        0.15805467875030e-05,
+        -0.1135378197072e-06,
+        0.83583361188e-08,
+        -0.6264424787e-09,
+        0.476033489e-10,
+        -0.36574154e-11,
+        0.2835431e-12,
+        -0.221473e-13,
+        0.17409e-14,
+        -0.1376e-15,
+        0.109e-16,
+        -0.9e-18
+    ])
+    double[::1] db2 = np.array([
+        2.5943810232570770282,
+        0.2863357204530719834,
+        -0.102062656158046713e-01,
+        0.6049109775346844e-03,
+        -0.405257658950210e-04,
+        0.28633826328811e-05,
+        -0.2086394303065e-06,
+        0.155237875826e-07,
+        -0.11731280087e-08,
+        0.897358589e-10,
+        -0.69317614e-11,
+        0.5398057e-12,
+        -0.423241e-13,
+        0.33378e-14,
+        -0.2645e-15,
+        0.211e-16,
+        -0.17e-17,
+        0.1e-18
+    ])
+    double[::1] db3 = np.array([
+        2.707737068327440945,
+        0.340068135211091751,
+        -0.12945150184440869e-01,
+        0.7963755380173816e-03,
+        -0.546360009590824e-04,
+        0.39243019598805e-05,
+        -0.2894032823539e-06,
+        0.217317613962e-07,
+        -0.16542099950e-08,
+        0.1272796189e-09,
+        -0.987963460e-11,
+        0.7725074e-12,
+        -0.607797e-13,
+        0.48076e-14,
+        -0.3820e-15,
+        0.305e-16,
+        -0.24e-17
+    ])
+    double[::1] db4 = np.array([
+        2.781869415020523460,
+        0.374976783526892863,
+        -0.14940907399031583e-01,
+        0.945679811437042e-03,
+        -0.66132916138933e-04,
+        0.4815632982144e-05,
+        -0.3588083958759e-06,
+        0.271601187416e-07,
+        -0.20807099122e-08,
+        0.1609383869e-09,
+        -0.125470979e-10,
+        0.9847265e-12,
+        -0.777237e-13,
+        0.61648e-14,
+        -0.4911e-15,
+        0.393e-16,
+        -0.32e-17
+    ])
+    double[::1] db5 = np.array([
+        2.8340269546834530149,
+        0.3994098857106266445,
+        -0.164566764773099646e-1,
+        0.10652138340664541e-2,
+        -0.756730374875418e-4,
+        0.55745985240273e-5,
+        -0.4190692330918e-6,
+        0.319456143678e-7,
+        -0.24613318171e-8,
+        0.1912801633e-9,
+        -0.149720049e-10,
+        0.11790312e-11,
+        -0.933329e-13,
+        0.74218e-14,
+        -0.5925e-15,
+        0.475e-16,
+        -0.39e-17
+    ])
+    double[::1] db6 = np.array([
+        2.8726727134130122113,
+        0.4174375352339027746,
+        -0.176453849354067873e-1,
+        0.11629852733494556e-2,
+        -0.837118027357117e-4,
+        0.62283611596189e-5,
+        -0.4718644465636e-6,
+        0.361950397806e-7,
+        -0.28030368010e-8,
+        0.2187681983e-9,
+        -0.171857387e-10,
+        0.13575809e-11,
+        -0.1077580e-12,
+        0.85893e-14,
+        -0.6872e-15,
+        0.552e-16,
+        -0.44e-17
+    ])
+
+
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def debye_1(x):
@@ -30,25 +148,6 @@ def debye_1(x):
 @cython.cdivision(True)
 cdef double _debye_1(double x) nogil:
     cdef:
-        double* constants = [
-            2.4006597190381410194,
-            0.1937213042189360089,
-            -0.62329124554895770e-02,
-            0.3511174770206480e-03,
-            -0.228222466701231e-04,
-            0.15805467875030e-05,
-            -0.1135378197072e-06,
-            0.83583361188e-08,
-            -0.6264424787e-09,
-            0.476033489e-10,
-            -0.36574154e-11,
-            0.2835431e-12,
-            -0.221473e-13,
-            0.17409e-14,
-            -0.1376e-15,
-            0.109e-16,
-            -0.9e-18
-        ]
         double val_infinity = 1.64493406684822644, xcut = -m.LOG_DBL_MIN
         int i, nexp
         double total, ex
@@ -58,7 +157,7 @@ cdef double _debye_1(double x) nogil:
     elif x < 2 * m.SQRT_DBL_EPSILON:
         return 1 - 0.25 * x + x ** 2 / 36
     elif x <= 4:
-        return cheb_eval(constants, x * x / 8 - 1, 17) - 0.25 * x
+        return cheb_eval(db1, x * x / 8 - 1) - 0.25 * x
     elif x <= -(m.M_LN2 + m.LOG_DBL_EPSILON):
         nexp = <int> cm.floor(xcut / x)
         ex = cm.exp(-x)
@@ -97,26 +196,6 @@ def debye_2(x):
 @cython.cdivision(True)
 cdef double _debye_2(double x) nogil:
     cdef:
-        double* constants = [
-            2.5943810232570770282,
-            0.2863357204530719834,
-            -0.102062656158046713e-01,
-            0.6049109775346844e-03,
-            -0.405257658950210e-04,
-            0.28633826328811e-05,
-            -0.2086394303065e-06,
-            0.155237875826e-07,
-            -0.11731280087e-08,
-            0.897358589e-10,
-            -0.69317614e-11,
-            0.5398057e-12,
-            -0.423241e-13,
-            0.33378e-14,
-            -0.2645e-15,
-            0.211e-16,
-            -0.17e-17,
-            0.1e-18
-        ]
         double val_infinity = 4.80822761263837714, xcut = -m.LOG_DBL_MIN
         int i, nexp
         double total, ex
@@ -126,7 +205,7 @@ cdef double _debye_2(double x) nogil:
     elif x < 2 * m.M_SQRT2 * m.SQRT_DBL_EPSILON:
         return 1 - x / 3 + x ** 2 / 24
     elif x <= 4:
-        return cheb_eval(constants, x * x / 8 - 1, 18) - x / 3
+        return cheb_eval(db2, x * x / 8 - 1) - x / 3
     elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
         nexp = <int> cm.floor(xcut / x)
         ex = cm.exp(-x)
@@ -170,25 +249,6 @@ def debye_3(x):
 @cython.cdivision(True)
 cdef double _debye_3(double x) nogil:
     cdef:
-        double* constants = [
-            2.707737068327440945,
-            0.340068135211091751,
-            -0.12945150184440869e-01,
-            0.7963755380173816e-03,
-            -0.546360009590824e-04,
-            0.39243019598805e-05,
-            -0.2894032823539e-06,
-            0.217317613962e-07,
-            -0.16542099950e-08,
-            0.1272796189e-09,
-            -0.987963460e-11,
-            0.7725074e-12,
-            -0.607797e-13,
-            0.48076e-14,
-            -0.3820e-15,
-            0.305e-16,
-            -0.24e-17
-        ]
         double val_infinity = 19.4818182068004875, xcut = -m.LOG_DBL_MIN
         int i, nexp
         double total, ex
@@ -198,7 +258,7 @@ cdef double _debye_3(double x) nogil:
     elif x < 2.0 * m.M_SQRT2 * m.SQRT_DBL_EPSILON:
         return 1 - 3 * x / 8 + x ** 2 / 20
     elif x <= 4:
-        return cheb_eval(constants, x * x / 8 - 1, 17) - 0.375 * x
+        return cheb_eval(db3, x * x / 8 - 1) - 0.375 * x
     elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
         nexp = <int>cm.floor(xcut / x)
         ex = cm.exp(-x)
@@ -239,25 +299,6 @@ def debye_4(x):
 @cython.cdivision(True)
 cdef double _debye_4(double x) nogil:
     cdef:
-        double* constants = [
-            2.781869415020523460,
-            0.374976783526892863,
-            -0.14940907399031583e-01,
-            0.945679811437042e-03,
-            -0.66132916138933e-04,
-            0.4815632982144e-05,
-            -0.3588083958759e-06,
-            0.271601187416e-07,
-            -0.20807099122e-08,
-            0.1609383869e-09,
-            -0.125470979e-10,
-            0.9847265e-12,
-            -0.777237e-13,
-            0.61648e-14,
-            -0.4911e-15,
-            0.393e-16,
-            -0.32e-17
-        ]
         double val_infinity = 99.5450644937635129, xcut = -m.LOG_DBL_MIN
         int i, nexp
         double total, ex
@@ -267,7 +308,7 @@ cdef double _debye_4(double x) nogil:
     elif x < 2.0 * m.M_SQRT2 * m.SQRT_DBL_EPSILON:
         return 1 - 2 * x / 5 + x ** 2 / 18
     elif x <= 4:
-        return cheb_eval(constants, x * x / 8 - 1, 17) - 0.4 * x
+        return cheb_eval(db4, x * x / 8 - 1) - 0.4 * x
     elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
         nexp = <int> cm.floor(xcut / x)
         ex = cm.exp(-x)
@@ -308,25 +349,7 @@ def debye_5(x):
 @cython.cdivision(True)
 cdef double _debye_5(double x) nogil:
     cdef:
-        double* constants = [
-            2.8340269546834530149,
-            0.3994098857106266445,
-            -0.164566764773099646e-1,
-            0.10652138340664541e-2,
-            -0.756730374875418e-4,
-            0.55745985240273e-5,
-            -0.4190692330918e-6,
-            0.319456143678e-7,
-            -0.24613318171e-8,
-            0.1912801633e-9,
-            -0.149720049e-10,
-            0.11790312e-11,
-            -0.933329e-13,
-            0.74218e-14,
-            -0.5925e-15,
-            0.475e-16,
-            -0.39e-17
-        ]
+
         double val_infinity = 610.405837190669483828710757875, xcut = -m.LOG_DBL_MIN
         int i, nexp
         double total, ex
@@ -336,7 +359,7 @@ cdef double _debye_5(double x) nogil:
     elif x < 2.0 * m.M_SQRT2 * m.SQRT_DBL_EPSILON:
         return 1 - 5 * x / 12 + 5 * x ** 2 / 84
     elif x <= 4:
-        return cheb_eval(constants, x * x / 8 - 1, 17) - 5 * x / 12
+        return cheb_eval(db5, x * x / 8 - 1) - 5 * x / 12
     elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
         nexp = <int> cm.floor(xcut / x)
         ex = cm.exp(-x)
@@ -376,25 +399,6 @@ def debye_6(x):
 @cython.cdivision(True)
 cdef double _debye_6(double x) nogil:
     cdef:
-        double* constants = [
-            2.8726727134130122113,
-            0.4174375352339027746,
-            -0.176453849354067873e-1,
-            0.11629852733494556e-2,
-            -0.837118027357117e-4,
-            0.62283611596189e-5,
-            -0.4718644465636e-6,
-            0.361950397806e-7,
-            -0.28030368010e-8,
-            0.2187681983e-9,
-            -0.171857387e-10,
-            0.13575809e-11,
-            -0.1077580e-12,
-            0.85893e-14,
-            -0.6872e-15,
-            0.552e-16,
-            -0.44e-17
-        ]
         double val_infinity = 4356.06887828990661194792541535, xcut = -m.LOG_DBL_MIN
         int i, nexp
         double total, ex
@@ -404,7 +408,7 @@ cdef double _debye_6(double x) nogil:
     elif x < 2.0 * m.M_SQRT2 * m.SQRT_DBL_EPSILON:
         return 1 - 3 * x / 7 + x ** 2 / 16
     elif x <= 4:
-        return cheb_eval(constants, x * x / 8 - 1, 17) - 3 * x / 7
+        return cheb_eval(db6, x * x / 8 - 1) - 3 * x / 7
     elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
         nexp = <int> cm.floor(xcut / x)
         ex = cm.exp(-x)
