@@ -130,6 +130,26 @@ def airy_Bi(x, threaded=True) -> Real:
     return a.airy_Bi(x, threaded)
 
 
+def airy_Bi_deriv(x, threaded=True) -> Real:
+    r"""
+    Compute the derivative of the Airy function the second kind.
+
+    Parameters
+    ----------
+    x: array_like
+        Numerical vector
+
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
+    Returns
+    -------
+    array_like or scalar
+        Derivative values from the Airy function
+    """
+    return d.airy_Bi_deriv(x, threaded)
+
+
 def airy_Bi_scaled(x, threaded=True) -> Real:
     r"""
     Computes a scaled version of the Airy function of the second kind.
@@ -161,3 +181,23 @@ def airy_Bi_scaled(x, threaded=True) -> Real:
         Values from the Airy function
     """
     return a.airy_Bi_scaled(x, threaded)
+
+
+def airy_Bi_deriv_scaled(x, threaded=True) -> Real:
+    r"""
+    Compute the scaled derivative of the Airy function the second kind.
+
+    Parameters
+    ----------
+    x: array_like
+        Numerical vector
+
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
+    Returns
+    -------
+    array_like or scalar
+        Derivative values from the Airy function
+    """
+    return d.airy_Bi_deriv_scaled(x, threaded)

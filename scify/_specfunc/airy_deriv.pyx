@@ -76,6 +76,16 @@ cdef:
        -0.0000000000000000215
     ])
     double[::1] bif = np.array([
+        0.1153536790828570243,
+        0.0205007894049192875,
+        0.0002135290278902876,
+        0.0000010783960614677,
+        0.0000000032094708833,
+        0.0000000000062930407,
+        0.0000000000000087403,
+        0.0000000000000000090
+    ])
+    double[::1] big = np.array([
         -0.097196440416443537390,
         0.149503576843167066571,
         0.003113525387121326042,
@@ -404,7 +414,7 @@ cdef Result _airy_Ai_deriv(double x) nogil:
         return make_r_nan()
 
 
-def airy_Ai_deriv_scaled(x, threaded):
+def airy_Ai_deriv_scaled(x, bint threaded):
     x = np.asarray(x, float)
     cdef:
         cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
@@ -455,4 +465,122 @@ cdef Result _airy_Ai_deriv_scaled(double x) nogil:
     s = cm.sqrt(sqx)
     val = -(0.28125 + a.val) * s
     err = a.err * s + m.DBL_EPSILON * cm.fabs(val)
+    return make_r(val, err)
+
+
+def airy_Bi_deriv(x, bint threaded):
+    x = np.asarray(x, float)
+    cdef:
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
+        int n = arr.size
+
+    if n == 1:
+        return _airy_Bi_deriv(arr[0]).val
+    if threaded:
+        map_dbl_p(_airy_Bi_deriv, arr, n)
+    else:
+        map_dbl_s(_airy_Bi_deriv, arr, n)
+
+    return arr.reshape(x.shape)
+
+
+cdef Result _airy_Bi_deriv(double x) nogil:
+    cdef:
+        Result a, p
+        double c, val, err, s, z
+        double x3 = x ** 3
+
+    if x < -1:
+        a, p = airy_deriv_mod_phase(x)
+        s = cm.sin(p.val)
+        val = a.val * s
+        err = cm.fabs(val * p.err) + cm.fabs(s * a.err) + m.DBL_EPSILON * cm.fabs(val)
+        return make_r(val, err)
+
+    elif x < 1:
+        a = cheb_eval_mode(bif, x3, -1, 1)
+        p = cheb_eval_mode(big, x3, -1, 1)
+        val = x * x * (0.25 + a.val) + p.val + 0.5
+        err = x * x * a.val + p.err + m.DBL_EPSILON * cm.fabs(val)
+
+        return make_r(val, err)
+
+    elif x < 2:
+        z = (2 * x3 - 9.) / 7
+        a = cheb_eval_mode(bif2, z, -1, 1)
+        p = cheb_eval_mode(big2, z, -1, 1)
+        val = x * x * (a.val + 0.25) + p.val + 0.5
+        err = x * x * a.err + p.err + m.DBL_EPSILON * cm.fabs(val)
+
+        return make_r(val, err)
+
+    elif x < m.ROOT3_DBL_MAX ** 2:
+        z = 2 * x * cm.sqrt(x) /3.
+        a = _airy_Bi_deriv_scaled(x)
+        return exp_mult_err(z, 1.5 * cm.fabs(z * m.DBL_EPSILON), a.val, a.err)
+    else:
+        return make_r_nan()
+
+
+def airy_Bi_deriv_scaled(x, bint threaded):
+    x = np.asarray(x, float)
+    cdef:
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
+        int n = arr.size
+
+    if n == 1:
+        return _airy_Bi_deriv_scaled(arr[0]).val
+    if threaded:
+        map_dbl_p(_airy_Bi_deriv_scaled, arr, n)
+    else:
+        map_dbl_s(_airy_Bi_deriv_scaled, arr, n)
+
+    return arr.reshape(x.shape)
+
+
+cdef Result _airy_Bi_deriv_scaled(double x) nogil:
+    cdef:
+        Result a, p
+        double c, val, err, s
+        double sqx = cm.sqrt(x)
+        double x3 = x ** 3
+
+    if x < -1:
+        a, p = airy_deriv_mod_phase(x)
+        s = cm.sin(p.val)
+        val = a.val * s
+        err = cm.fabs(val * p.err) + cm.fabs(s * a.err) + m.DBL_EPSILON * cm.fabs(val)
+        return make_r(val, err)
+
+    elif x < 1:
+        a = cheb_eval_mode(bif, x3, -1, 1)
+        p = cheb_eval_mode(big, x3, -1, 1)
+        val = x * x * (0.25 + a.val) + p.val + 0.5
+        err = x * x * a.err + p.err + m.DBL_EPSILON * cm.fabs(val)
+
+        if x > m.ROOT3_DBL_EPSILON ** 2:
+            s = cm.exp(-2. / 3 * x ** 1.5)
+            val *= s
+            err *= s
+
+        return make_r(val, err)
+
+    elif x < 2:
+        c = (2 * x3 - 9.) / 7
+        s = cm.exp(-2. / 3 * x ** 1.5)
+        a = cheb_eval_mode(bif2, c, -1, 1)
+        p = cheb_eval_mode(big2, c, -1, 1)
+        val = s * (x * x * (0.25 + a.val) + 0.5 + p.val)
+        err = s * (x * x * a.err + p.err) + m.DBL_EPSILON * cm.fabs(val)
+
+        return make_r(val, err)
+
+    elif x < 4:
+        a = cheb_eval_mode(bip1, 8.7506905708484345 / (x * sqx) - 2.0938363213560543, -1, 1)
+    else:
+        a = cheb_eval_mode(bip2, 16 / (x * sqx) -1, -1, 1)
+
+    s = cm.sqrt(sqx)
+    val = s * (0.625 + a.val)
+    err = s * a.err + m.DBL_EPSILON * cm.fabs(val)
     return make_r(val, err)
