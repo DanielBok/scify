@@ -1,6 +1,8 @@
 from .._specfunc import airy as a
 from .._specfunc import airy_deriv as d
 
+__all__ = ['airy_Ai', 'airy_Ai_scaled', 'airy_Ai_deriv', 'airy_Ai_deriv_scaled', 'airy_Bi', 'airy_Bi_scaled']
+
 
 def airy_Ai(x, threaded=True):
     r"""
@@ -14,7 +16,7 @@ def airy_Ai(x, threaded=True):
 
     Parameters
     ----------
-    x: {array_like, scalar}
+    x: array_like
         Numerical vector
 
     threaded: bool, optional
@@ -34,7 +36,7 @@ def airy_Ai_deriv(x, threaded=True):
 
     Parameters
     ----------
-    x: {array_like, scalar}
+    x: array_like
         Numerical vector
 
     threaded: bool, optional
@@ -67,7 +69,7 @@ def airy_Ai_scaled(x, threaded=True):
 
     Parameters
     ----------
-    x: {array_like, scalar}
+    x: array_like
         Numerical vector
 
     threaded: bool, optional
@@ -87,7 +89,7 @@ def airy_Ai_deriv_scaled(x, threaded=True):
 
     Parameters
     ----------
-    x: {array_like, scalar}
+    x: array_like
         Numerical vector
 
     threaded: bool, optional
@@ -113,7 +115,7 @@ def airy_Bi(x, threaded=True):
 
     Parameters
     ----------
-    x: {array_like, scalar}
+    x: array_like
         Numerical vector
 
     threaded: bool, optional
@@ -146,7 +148,7 @@ def airy_Bi_scaled(x, threaded=True):
 
     Parameters
     ----------
-    x: {array_like, scalar}
+    x: array_like
         Numerical vector
 
     threaded: bool, optional

@@ -131,19 +131,19 @@ cdef:
 
 
 def debye_1(x, bint threaded):
-    if np.isscalar(x):
-        return _debye_1(x).val
-
+    x = np.asarray(x, float)
     cdef:
-        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
         int n = arr.size
 
-    if threaded:
+    if n == 1:
+        return _debye_1(arr[0]).val
+    elif threaded:
         map_dbl_p(_debye_1, arr, n)
     else:
         map_dbl_s(_debye_1, arr, n)
 
-    return arr.reshape(np.shape(x))
+    return arr.reshape(x.shape)
 
 
 cdef Result _debye_1(double x) nogil:
@@ -189,19 +189,19 @@ cdef Result _debye_1(double x) nogil:
 
 
 def debye_2(x, bint threaded):
-    if np.isscalar(x):
-        return _debye_2(x).val
-
+    x = np.asarray(x, float)
     cdef:
-        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
         int n = arr.size
 
-    if threaded:
+    if n == 1:
+        return _debye_2(arr[0]).val
+    elif threaded:
         map_dbl_p(_debye_2, arr, n)
     else:
         map_dbl_s(_debye_2, arr, n)
 
-    return arr.reshape(np.shape(x))
+    return arr.reshape(x.shape)
 
 
 cdef Result _debye_2(double x) nogil:
@@ -249,19 +249,19 @@ cdef Result _debye_2(double x) nogil:
 
 
 def debye_3(x, bint threaded):
-    if np.isscalar(x):
-        return _debye_3(x).val
-
+    x = np.asarray(x, float)
     cdef:
-        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
         int n = arr.size
 
-    if threaded:
+    if n == 1:
+        return _debye_3(arr[0]).val
+    elif threaded:
         map_dbl_p(_debye_3, arr, n)
     else:
         map_dbl_s(_debye_3, arr, n)
 
-    return arr.reshape(np.shape(x))
+    return arr.reshape(x.shape)
 
 
 cdef Result _debye_3(double x) nogil:
@@ -308,19 +308,19 @@ cdef Result _debye_3(double x) nogil:
 
 
 def debye_4(x, bint threaded):
-    if np.isscalar(x):
-        return _debye_4(x).val
-
+    x = np.asarray(x, float)
     cdef:
-        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
         int n = arr.size
 
-    if threaded:
+    if n == 1:
+        return _debye_4(arr[0]).val
+    elif threaded:
         map_dbl_p(_debye_4, arr, n)
     else:
         map_dbl_s(_debye_4, arr, n)
 
-    return arr.reshape(np.shape(x))
+    return arr.reshape(x.shape)
 
 
 cdef Result _debye_4(double x) nogil:
@@ -367,19 +367,19 @@ cdef Result _debye_4(double x) nogil:
     return res
 
 def debye_5(x, bint threaded):
-    if np.isscalar(x):
-        return _debye_5(x).val
-
+    x = np.asarray(x, float)
     cdef:
-        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
         int n = arr.size
 
-    if threaded:
+    if n == 1:
+        return _debye_5(arr[0]).val
+    elif threaded:
         map_dbl_p(_debye_5, arr, n)
     else:
         map_dbl_s(_debye_5, arr, n)
 
-    return arr.reshape(np.shape(x))
+    return arr.reshape(x.shape)
 
 
 cdef Result _debye_5(double x) nogil:
@@ -426,19 +426,19 @@ cdef Result _debye_5(double x) nogil:
 
 
 def debye_6(x, bint threaded):
-    if np.isscalar(x):
-        return _debye_6(x).val
-
+    x = np.asarray(x, float)
     cdef:
-        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
         int n = arr.size
 
-    if threaded:
+    if n == 1:
+        return _debye_6(arr[0]).val
+    elif threaded:
         map_dbl_p(_debye_6, arr, n)
     else:
         map_dbl_s(_debye_6, arr, n)
 
-    return arr.reshape(np.shape(x))
+    return arr.reshape(x.shape)
 
 
 cdef Result _debye_6(double x) nogil:

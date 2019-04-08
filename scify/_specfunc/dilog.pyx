@@ -17,19 +17,19 @@ cdef:
 
 
 def dilog(x, bint threaded):
-    if np.isscalar(x):
-        return _dilog(x).val
-
+    x = np.asarray(x, float)
     cdef:
-        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
         int n = arr.size
 
-    if threaded:
+    if n == 1:
+        return _dilog(arr[0]).val
+    if threaded and n > 1:
         map_dbl_p(_dilog, arr, n)
     else:
         map_dbl_s(_dilog, arr, n)
 
-    return arr.reshape(np.shape(x))
+    return arr.reshape(x.shape)
 
 cdef Result _dilog(double x) nogil:
     cdef:
@@ -148,25 +148,26 @@ cdef Result dilog_series_2(double x) nogil:
     return res
 
 def dilog_complex(r, theta, bint threaded):
-    assert np.shape(r) == np.shape(theta), "Radius of complex vector must have same shape as the angled part"
+    r = np.asarray(r, float)
+    theta = np.asarray(theta, float)
+
     cdef:
         ComplexResult c
-
-    if np.isscalar(r) and np.isscalar(theta):
-        c = _dilog_complex(r, theta)
-        return c.real + 1j * c.imag
-
-    cdef:
-        cnp.ndarray[cnp.npy_float64, ndim=1] r_vec = np.ravel(r)
-        cnp.ndarray[cnp.npy_float64, ndim=1] theta_vec = np.ravel(theta)
+        cnp.ndarray[cnp.npy_float64, ndim=1] r_vec = r.ravel()
+        cnp.ndarray[cnp.npy_float64, ndim=1] theta_vec = theta.ravel()
         int n = r_vec.size
 
+    assert r.shape == theta.shape, "Radius of complex vector must have same shape as the angled part"
+
+    if n == 1:
+        c = _dilog_complex(r, theta)
+        return c.real + 1j * c.imag
     if threaded:
         mapc_dbl_p(_dilog_complex, r_vec, theta_vec, n)
     else:
         mapc_dbl_s(_dilog_complex, r_vec, theta_vec, n)
 
-    return (r_vec + 1j * theta_vec).reshape(np.shape(r))
+    return (r_vec + 1j * theta_vec).reshape(r.shape)
 
 cdef ComplexResult _dilog_complex(double r, double theta) nogil:
     cdef:

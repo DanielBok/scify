@@ -362,19 +362,19 @@ cdef Result airy_aie(double x) nogil:
 
 
 def airy_Ai(x, bint threaded):
-    if np.isscalar(x):
-        return _airy_Ai(x).val
-
+    x = np.asarray(x, float)
     cdef:
-        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
         int n = arr.size
 
+    if n == 1:
+        return _airy_Ai(arr[0]).val
     if threaded:
         map_dbl_p(_airy_Ai, arr, n)
     else:
         map_dbl_s(_airy_Ai, arr, n)
 
-    return arr.reshape(np.shape(x))
+    return arr.reshape(x.shape)
 
 
 cdef Result _airy_Ai(double x) nogil:
@@ -411,19 +411,19 @@ cdef Result _airy_Ai(double x) nogil:
 
 
 def airy_Ai_scaled(x, bint threaded):
-    if np.isscalar(x):
-        return _airy_Ai_scaled(x).val
-
+    x = np.asarray(x, float)
     cdef:
-        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
         int n = arr.size
 
+    if n == 1:
+        return _airy_Ai_scaled(arr[0]).val
     if threaded:
         map_dbl_p(_airy_Ai_scaled, arr, n)
     else:
         map_dbl_s(_airy_Ai_scaled, arr, n)
 
-    return arr.reshape(np.shape(x))
+    return arr.reshape(x.shape)
 
 
 cdef Result _airy_Ai_scaled(double x) nogil:
@@ -473,19 +473,19 @@ cdef Result airy_bie(double x) nogil:
 
 
 def airy_Bi(x, bint threaded):
-    if np.isscalar(x):
-        return _airy_Bi(x).val
-
+    x = np.asarray(x, float)
     cdef:
-        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
         int n = arr.size
 
+    if n == 1:
+        return _airy_Bi(arr[0]).val
     if threaded:
         map_dbl_p(_airy_Bi, arr, n)
     else:
         map_dbl_s(_airy_Bi, arr, n)
 
-    return arr.reshape(np.shape(x))
+    return arr.reshape(x.shape)
 
 
 cdef Result _airy_Bi(double x) nogil:
@@ -527,19 +527,19 @@ cdef Result _airy_Bi(double x) nogil:
     return res
 
 def airy_Bi_scaled(x, bint threaded):
-    if np.isscalar(x):
-        return _airy_Bi_scaled(x).val
-
+    x = np.asarray(x, float)
     cdef:
-        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
         int n = arr.size
 
+    if n == 1:
+        return _airy_Bi_scaled(arr[0]).val
     if threaded:
         map_dbl_p(_airy_Bi_scaled, arr, n)
     else:
         map_dbl_s(_airy_Bi_scaled, arr, n)
 
-    return arr.reshape(np.shape(x))
+    return arr.reshape(x.shape)
 
 
 cdef Result _airy_Bi_scaled(double x) nogil:

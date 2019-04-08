@@ -14,7 +14,7 @@ def clausen(x, threaded=True):
 
     Parameters
     ----------
-    x: {array_like, scalar}
+    x: array_like
         Numeric vector input
 
     threaded: bool, optional

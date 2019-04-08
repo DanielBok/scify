@@ -2,7 +2,6 @@ import numpy as np
 
 from .._specfunc import dilog as d
 
-
 def dilog(x, threaded=True):
     r"""
     Computes the dilogarithm for a real argument. In Lewin’s notation this is  :math:`Li_2(x)`,
@@ -13,7 +12,7 @@ def dilog(x, threaded=True):
 
     Parameters
     ----------
-    x: {array_like, scalar}
+    x: array_like
         Numeric vector input
 
     threaded: bool, optional
@@ -34,7 +33,7 @@ def dilog_complex(r, theta=None, threaded=True):
 
     Parameters
     ----------
-    r: {array_like, scalar}
+    r: array_like
         The modulus of the complex vector or scalar. If `theta` is None, interpret `r` as a complex valued object
 
     theta: {array_like, scalar}, optional

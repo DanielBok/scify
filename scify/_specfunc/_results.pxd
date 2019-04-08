@@ -12,6 +12,7 @@ ctypedef struct ComplexResult:
 ctypedef Result (*Fn1R) (double) nogil
 ctypedef ComplexResult (*Fn1C) (double, double) nogil
 
+
 cdef:
     Result make_r(double val, double err) nogil
     Result make_r_0() nogil

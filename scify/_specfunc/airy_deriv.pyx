@@ -358,19 +358,19 @@ cdef (Result, Result) airy_deriv_mod_phase(double x) nogil:
 
 
 def airy_Ai_deriv(x, bint threaded):
-    if np.isscalar(x):
-        return _airy_Ai_deriv(x).val
-
+    x = np.asarray(x, float)
     cdef:
-        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
         int n = arr.size
 
+    if n == 1:
+        return _airy_Ai_deriv(arr[0]).val
     if threaded:
         map_dbl_p(_airy_Ai_deriv, arr, n)
     else:
         map_dbl_s(_airy_Ai_deriv, arr, n)
 
-    return arr.reshape(np.shape(x))
+    return arr.reshape(x.shape)
 
 
 cdef Result _airy_Ai_deriv(double x) nogil:
@@ -405,19 +405,19 @@ cdef Result _airy_Ai_deriv(double x) nogil:
 
 
 def airy_Ai_deriv_scaled(x, threaded):
-    if np.isscalar(x):
-        return _airy_Ai_deriv_scaled(x).val
-
+    x = np.asarray(x, float)
     cdef:
-        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
+        cnp.ndarray[cnp.npy_float64, ndim=1] arr = x.ravel()
         int n = arr.size
 
+    if n == 1:
+        return _airy_Ai_deriv_scaled(arr[0]).val
     if threaded:
         map_dbl_p(_airy_Ai_deriv_scaled, arr, n)
     else:
         map_dbl_s(_airy_Ai_deriv_scaled, arr, n)
 
-    return arr.reshape(np.shape(x))
+    return arr.reshape(x.shape)
 
 
 cdef Result _airy_Ai_deriv_scaled(double x) nogil:
