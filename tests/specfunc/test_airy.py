@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_almost_equal
 
-from scify.specfunc import airy as a
+import scify.specfunc.airy as a
 
 
 @pytest.mark.parametrize('x, exp', [
@@ -223,3 +223,11 @@ def test_benchmark_airy_Bi(benchmark, data):
 
 def test_benchmark_airy_Bi_scaled(benchmark, data):
     benchmark(a.airy_Bi_scaled, data, threaded=False)
+
+
+def test_benchmark_airy_Bi_deriv(benchmark, data):
+    benchmark(a.airy_Bi_deriv, data, threaded=False)
+
+
+def test_benchmark_airy_Bi_deriv_scaled(benchmark, data):
+    benchmark(a.airy_Bi_deriv_scaled, data, threaded=False)

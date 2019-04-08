@@ -1,8 +1,35 @@
+import numpy as np
+
 from scify.types import Real
 from .._specfunc import airy as a
 from .._specfunc import airy_deriv as d
 
-__all__ = ['airy_Ai', 'airy_Ai_scaled', 'airy_Ai_deriv', 'airy_Ai_deriv_scaled', 'airy_Bi', 'airy_Bi_scaled']
+__all__ = ['airy_', 'airy_Ai', 'airy_Ai_scaled', 'airy_Ai_deriv', 'airy_Ai_deriv_scaled', 'airy_Bi', 'airy_Bi_scaled']
+
+
+def airy_(x, threaded=True) -> np.ndarray:
+    """
+    Computes Airy Ai, dAi, Bi, dBi functions
+
+    x: array_like
+        Numerical vector
+
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
+    Returns
+    -------
+    ndarray
+        Airy functions of the first order, derivative of the first order, second order and derivative of the second
+        order
+    """
+    res = np.asarray([
+        airy_Ai(x, threaded),
+        airy_Ai_deriv(x, threaded),
+        airy_Bi(x, threaded),
+        airy_Bi_deriv(x, threaded),
+    ])
+    return res if res.ndim == 1 else res.T
 
 
 def airy_Ai(x, threaded=True) -> Real:
