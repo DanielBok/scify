@@ -9,7 +9,7 @@ Result, make_r_0, make_r_nan, map_dbl_p, map_dbl_s,
 ComplexResult, make_c_0, mapc_dbl_p, mapc_dbl_s
 )
 from .clausen cimport _clausen
-from .log cimport complex_log
+from .log cimport _complex_log
 
 cdef:
     double PI = m.M_PI
@@ -154,20 +154,20 @@ def dilog_complex(r, theta, bint threaded):
     cdef:
         ComplexResult c
         cnp.ndarray[cnp.npy_float64, ndim=1] r_vec = r.ravel()
-        cnp.ndarray[cnp.npy_float64, ndim=1] theta_vec = theta.ravel()
+        cnp.ndarray[cnp.npy_float64, ndim=1] i_vec = theta.ravel()
         int n = r_vec.size
 
     assert r.shape == theta.shape, "Radius of complex vector must have same shape as the angled part"
 
     if n == 1:
-        c = _dilog_complex(r, theta)
+        c = _dilog_complex(r_vec[0], i_vec[0])
         return c.real + 1j * c.imag
     if threaded:
-        mapc_dbl_p(_dilog_complex, r_vec, theta_vec, n)
+        mapc_dbl_p(_dilog_complex, r_vec, i_vec, n)
     else:
-        mapc_dbl_s(_dilog_complex, r_vec, theta_vec, n)
+        mapc_dbl_s(_dilog_complex, r_vec, i_vec, n)
 
-    return (r_vec + 1j * theta_vec).reshape(r.shape)
+    return (r_vec + 1j * i_vec).reshape(r.shape)
 
 cdef ComplexResult _dilog_complex(double r, double theta) nogil:
     cdef:
@@ -294,7 +294,7 @@ cdef ComplexResult dilogc_series_2(double r, double x, double y) nogil:
         return c
 
     sum_c = series_2_c(r, x, y)
-    ln_omz = complex_log(1 - x, -y)
+    ln_omz = _complex_log(1 - x, -y)
 
     tx = (ln_omz.real * x + ln_omz.imag * y) / r2
     ty = (-ln_omz.real * y + ln_omz.imag * x) / r2
