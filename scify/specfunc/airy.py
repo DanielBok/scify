@@ -1,10 +1,11 @@
+from scify.types import Real
 from .._specfunc import airy as a
 from .._specfunc import airy_deriv as d
 
 __all__ = ['airy_Ai', 'airy_Ai_scaled', 'airy_Ai_deriv', 'airy_Ai_deriv_scaled', 'airy_Bi', 'airy_Bi_scaled']
 
 
-def airy_Ai(x, threaded=True):
+def airy_Ai(x, threaded=True) -> Real:
     r"""
     Computes the Airy function of the first kind. This is defined as
 
@@ -30,7 +31,7 @@ def airy_Ai(x, threaded=True):
     return a.airy_Ai(x, threaded)
 
 
-def airy_Ai_deriv(x, threaded=True):
+def airy_Ai_deriv(x, threaded=True) -> Real:
     """
     Compute the derivative of the Airy function the first kind
 
@@ -50,7 +51,7 @@ def airy_Ai_deriv(x, threaded=True):
     return d.airy_Ai_deriv(x, threaded)
 
 
-def airy_Ai_scaled(x, threaded=True):
+def airy_Ai_scaled(x, threaded=True) -> Real:
     r"""
     Computes a scaled version of the Airy function of the first kind.
 
@@ -83,7 +84,7 @@ def airy_Ai_scaled(x, threaded=True):
     return a.airy_Ai_scaled(x, threaded)
 
 
-def airy_Ai_deriv_scaled(x, threaded=True):
+def airy_Ai_deriv_scaled(x, threaded=True) -> Real:
     """
     Compute the scaled derivative of the Airy function the first kind
 
@@ -103,7 +104,7 @@ def airy_Ai_deriv_scaled(x, threaded=True):
     return d.airy_Ai_deriv_scaled(x, threaded)
 
 
-def airy_Bi(x, threaded=True):
+def airy_Bi(x, threaded=True) -> Real:
     r"""
     Computes the Airy function of the second kind. This is defined as
 
@@ -129,7 +130,7 @@ def airy_Bi(x, threaded=True):
     return a.airy_Bi(x, threaded)
 
 
-def airy_Bi_scaled(x, threaded=True):
+def airy_Bi_scaled(x, threaded=True) -> Real:
     r"""
     Computes a scaled version of the Airy function of the second kind.
 

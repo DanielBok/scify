@@ -1,7 +1,8 @@
+from scify.types import Real
 from .._specfunc import clausen as c
 
 
-def clausen(x, threaded=True):
+def clausen(x, threaded=True) -> Real:
     r"""
     The Clausen function is defined by the following integral,
 

@@ -1,9 +1,13 @@
+from scify.types import Real
+
+import numpy as np
+
 from .._specfunc import debye as d
 
 __all__ = ['debye_n', 'debye_1', 'debye_2', 'debye_3', 'debye_4', 'debye_5', 'debye_6']
 
 
-def debye_n(x, order=1, threaded=True):
+def debye_n(x, order=1, threaded=True) -> Real:
     r"""
     Computes the nth order Debye function
 
@@ -44,7 +48,7 @@ def debye_n(x, order=1, threaded=True):
         return debye_6(x, threaded)
 
 
-def debye_1(x, threaded=True):
+def debye_1(x, threaded=True) -> Real:
     r"""
     Computes the first-order Debye function
 
@@ -68,7 +72,7 @@ def debye_1(x, threaded=True):
     return d.debye_1(x, threaded)
 
 
-def debye_2(x, threaded=True):
+def debye_2(x, threaded=True) -> Real:
     r"""
     Computes the second-order Debye function
 
@@ -91,7 +95,7 @@ def debye_2(x, threaded=True):
     return d.debye_2(x, threaded)
 
 
-def debye_3(x, threaded=True):
+def debye_3(x, threaded=True) -> Real:
     r"""
     Computes the third-order Debye function
 
@@ -115,7 +119,7 @@ def debye_3(x, threaded=True):
     return d.debye_3(x, threaded)
 
 
-def debye_4(x, threaded=True):
+def debye_4(x, threaded=True) -> Real:
     r"""
     Computes the fourth-order Debye function
 
@@ -133,13 +137,13 @@ def debye_4(x, threaded=True):
 
     Returns
     -------
-    array_like or scalar
+    array_like
         Value of the Debye function
     """
     return d.debye_4(x, threaded)
 
 
-def debye_5(x, threaded=True):  # pragma: no cover
+def debye_5(x, threaded=True) -> Real:  # pragma: no cover
     r"""
     Computes the fifth-order Debye function
 
@@ -157,13 +161,13 @@ def debye_5(x, threaded=True):  # pragma: no cover
 
     Returns
     -------
-    array_like or scalar
+    array_like
         Value of the Debye function
     """
     return d.debye_5(x, threaded)
 
 
-def debye_6(x, threaded=True):  # pragma: no cover
+def debye_6(x, threaded=True) -> Real:  # pragma: no cover
     r"""
     Computes the sixth-order Debye function
 
@@ -181,7 +185,7 @@ def debye_6(x, threaded=True):  # pragma: no cover
 
     Returns
     -------
-    array_like or scalar
+    array_like
         Value of the Debye function
     """
     return d.debye_6(x, threaded)

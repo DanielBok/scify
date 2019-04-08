@@ -1,8 +1,10 @@
 import numpy as np
 
+from scify.types import Complex, Real
 from .._specfunc import dilog as d
 
-def dilog(x, threaded=True):
+
+def dilog(x, threaded=True) -> Real:
     r"""
     Computes the dilogarithm for a real argument. In Lewin’s notation this is  :math:`Li_2(x)`,
     the real part of the dilogarithm of a real :math:`x`. It is defined by the integral
@@ -26,17 +28,17 @@ def dilog(x, threaded=True):
     return d.dilog(x, threaded)
 
 
-def dilog_complex(r, theta=None, threaded=True):
+def dilog_complex(r, theta=None, threaded=True) -> Complex:
     r"""
     This function computes the full complex-valued dilogarithm for the complex argument
-    :math=:`z = r \exp(i \theta)`.
+    :math:`z = r \exp^{i \theta}`.
 
     Parameters
     ----------
     r: array_like
         The modulus of the complex vector or scalar. If `theta` is None, interpret `r` as a complex valued object
 
-    theta: {array_like, scalar}, optional
+    theta: array_like, optional
         The argument of the complex vector or scalar
 
     threaded: bool, optional
