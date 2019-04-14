@@ -122,6 +122,28 @@ def test_airy_Ai_deriv_scaled(x, exp):
     assert_almost_equal(a.airy_Ai_deriv_scaled(x), exp)
 
 
+@pytest.mark.parametrize("x, exp", [
+    [(1, 5.4, 40, 81.9), (-2.33810741045977, -7.94413358712085, -32.7380996090003, -52.5117011293677)],
+    (0, np.nan),
+    (50.1, -38.0210086772553),
+    (110.5, -64.4313567099132),
+    (120, -68.2880290175975)
+])
+def test_airy_zero_Ai(x, exp):
+    assert_almost_equal(a.airy_zero_Ai(x), exp)
+
+
+@pytest.mark.parametrize("x, exp", [
+    [(1, 5.4, 40, 81.9), (-1.01879297164747, -7.37217725504777, -32.4627527462385, -52.2946192963684)],
+    (0, np.nan),
+    (50.1, -37.7656591005389),
+    (110.5, -64.2354561724355),
+    (120, -68.0977577894053)
+])
+def test_airy_zero_Ai_deriv(x, exp):
+    assert_almost_equal(a.airy_zero_Ai_deriv(x), exp)
+
+
 @pytest.mark.parametrize('x, exp', [
     (np.arange(-3, 3.1, 0.4), [-0.198289626374927,
                                -0.405008278130034,
@@ -201,6 +223,28 @@ def test_airy_Bi_deriv_scaled(x, exp):
     assert_almost_equal(a.airy_Bi_deriv_scaled(x), exp)
 
 
+@pytest.mark.parametrize("x, exp", [
+    [(1, 5.4, 40, 81.9), (-1.17371322270913, -7.37676207936776, -32.4629899668369, -52.2947107123124)],
+    (0, np.nan),
+    (50.1, -37.7658343816518),
+    (110.5, -64.2355167606561),
+    (120, -68.0978116998048)
+])
+def test_airy_zero_Bi(x, exp):
+    assert_almost_equal(a.airy_zero_Bi(x), exp)
+
+
+@pytest.mark.parametrize("x, exp", [
+    [(1, 5.4, 40, 81.9), (-2.29443968261412, -7.94017868916858, -32.7378663584027, -52.5116104673595)],
+    (0, np.nan),
+    (50.1, -38.0208357409579),
+    (110.5, -64.4312964894484),
+    (120, -68.2879754071149)
+])
+def test_airy_zero_Bi_deriv(x, exp):
+    assert_almost_equal(a.airy_zero_Bi_deriv(x), exp)
+
+
 def test_benchmark_airy_Ai(benchmark, data):
     benchmark(a.airy_Ai, data, threaded=False)
 
@@ -217,6 +261,14 @@ def test_benchmark_airy_Ai_deriv_scaled(benchmark, data):
     benchmark(a.airy_Ai_deriv_scaled, data, threaded=False)
 
 
+def test_benchmark_airy_zero_Ai(benchmark, data):
+    benchmark(a.airy_zero_Ai, data, threaded=False)
+
+
+def test_benchmark_airy_zero_Ai_deriv(benchmark, data):
+    benchmark(a.airy_zero_Ai_deriv, data, threaded=False)
+
+
 def test_benchmark_airy_Bi(benchmark, data):
     benchmark(a.airy_Bi, data, threaded=False)
 
@@ -231,3 +283,11 @@ def test_benchmark_airy_Bi_deriv(benchmark, data):
 
 def test_benchmark_airy_Bi_deriv_scaled(benchmark, data):
     benchmark(a.airy_Bi_deriv_scaled, data, threaded=False)
+
+
+def test_benchmark_airy_zero_Bi(benchmark, data):
+    benchmark(a.airy_zero_Bi, data, threaded=False)
+
+
+def test_benchmark_airy_zero_Bi_deriv(benchmark, data):
+    benchmark(a.airy_zero_Bi_deriv, data, threaded=False)

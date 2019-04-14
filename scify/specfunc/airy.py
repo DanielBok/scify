@@ -1,35 +1,10 @@
-import numpy as np
-
 from scify.types import Real
 from .._specfunc import airy as a
 from .._specfunc import airy_deriv as d
+from .._specfunc import airy_zero as z
 
-__all__ = ['airy_', 'airy_Ai', 'airy_Ai_scaled', 'airy_Ai_deriv', 'airy_Ai_deriv_scaled', 'airy_Bi', 'airy_Bi_scaled']
-
-
-def airy_(x, threaded=True) -> np.ndarray:
-    """
-    Computes Airy Ai, dAi, Bi, dBi functions
-
-    x: array_like
-        Numerical vector
-
-    threaded: bool, optional
-        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
-
-    Returns
-    -------
-    ndarray
-        Airy functions of the first order, derivative of the first order, second order and derivative of the second
-        order
-    """
-    res = np.asarray([
-        airy_Ai(x, threaded),
-        airy_Ai_deriv(x, threaded),
-        airy_Bi(x, threaded),
-        airy_Bi_deriv(x, threaded),
-    ])
-    return res if res.ndim == 1 else res.T
+__all__ = ['airy_Ai', 'airy_Ai_scaled', 'airy_Ai_deriv', 'airy_Ai_deriv_scaled', 'airy_zero_Ai', 'airy_zero_Ai_deriv',
+           'airy_Bi', 'airy_Bi_scaled', 'airy_Bi_deriv', 'airy_Bi_deriv_scaled', 'airy_zero_Bi', 'airy_zero_Bi_deriv']
 
 
 def airy_Ai(x, threaded=True) -> Real:
@@ -131,6 +106,46 @@ def airy_Ai_deriv_scaled(x, threaded=True) -> Real:
     return d.airy_Ai_deriv_scaled(x, threaded)
 
 
+def airy_zero_Ai(x, threaded=True) -> Real:
+    r"""
+    Compute the location of the s-th zero of the Airy function :math:`Ai(x)`
+
+    Parameters
+    ----------
+    x: array_like
+        Integer valued scalar or vector
+
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
+    Returns
+    -------
+    array_like or scalar
+        Location of the s-th zero of the Airy function
+    """
+    return z.airy_zero_Ai(x, threaded)
+
+
+def airy_zero_Ai_deriv(x, threaded=True) -> Real:
+    r"""
+    Compute the location of the s-th zero of the Airy function derivative :math:`Ai'(x)`.
+
+    Parameters
+    ----------
+    x: array_like
+        Integer valued scalar or vector
+
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
+    Returns
+    -------
+    array_like or scalar
+        Location of the s-th zero of the Airy function derivative
+    """
+    return z.airy_zero_Ai_deriv(x, threaded)
+
+
 def airy_Bi(x, threaded=True) -> Real:
     r"""
     Computes the Airy function of the second kind. This is defined as
@@ -228,3 +243,43 @@ def airy_Bi_deriv_scaled(x, threaded=True) -> Real:
         Derivative values from the Airy function
     """
     return d.airy_Bi_deriv_scaled(x, threaded)
+
+
+def airy_zero_Bi(x, threaded=True) -> Real:
+    r"""
+    Compute the location of the s-th zero of the Airy function :math:`Bi(x)`
+
+    Parameters
+    ----------
+    x: array_like
+        Integer valued scalar or vector
+
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
+    Returns
+    -------
+    array_like or scalar
+        Location of the s-th zero of the Airy function
+    """
+    return z.airy_zero_Bi(x, threaded)
+
+
+def airy_zero_Bi_deriv(x, threaded=True) -> Real:
+    r"""
+    Compute the location of the s-th zero of the Airy function derivative :math:`Bi'(x)`.
+
+    Parameters
+    ----------
+    x: array_like
+        Integer valued scalar or vector
+
+    threaded: bool, optional
+        If True, uses multi-threading. Multi-threading is supported by the OpenMP api.
+
+    Returns
+    -------
+    array_like or scalar
+        Location of the s-th zero of the Airy function derivative
+    """
+    return z.airy_zero_Bi_deriv(x, threaded)
