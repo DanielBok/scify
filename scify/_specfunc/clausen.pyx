@@ -45,21 +45,6 @@ def clausen(x, bint threaded=True):
     return arr.reshape(x.shape)
 
 
-def clausen_old(x, bint threaded=True):
-    cdef:
-        cnp.ndarray[cnp.npy_float64, ndim=1] arr = np.ravel(x)
-        int n = arr.size
-
-    if n == 1:
-        return _clausen(arr[0]).val
-    if threaded and n > 1:
-        map_dbl_p(_clausen, arr, n)
-    else:
-        map_dbl_s(_clausen, arr, n)
-
-    return arr.reshape(np.shape(x))
-
-
 cdef Result _clausen(double x) nogil:
     cdef:
         Result res = make_r_0()
