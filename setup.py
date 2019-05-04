@@ -1,10 +1,10 @@
 import os
+import platform
 import re
 import sys
 
-from setuptools import setup, find_packages, Extension
-
 import numpy as np
+from setuptools import setup, find_packages, Extension
 
 ENV = 'DEV'
 argv = sys.argv
@@ -41,6 +41,15 @@ def build_extensions():
     if IS_DEV_MODE:
         macros.append(('CYTHON_TRACE', '1'))
 
+    if IS_DEV_MODE:
+        macros.append(('CYTHON_TRACE', '1'))
+
+    if platform.system() == 'Windows':
+        parallelism_options = {'extra_compile_args': ['/openmp']}
+    else:
+        parallelism_options = {'extra_compile_args': ['-fopenmp'],
+                               'extra_link_args': ['-fopenmp']}
+
     extensions = []
     for root, _, files in os.walk("scify"):
         path_parts = os.path.normcase(root).split(os.sep)
@@ -61,9 +70,9 @@ def build_extensions():
                     module_path,
                     [pyx_c_file_path],
                     language='c',
-                    extra_compile_args=['/openmp'],
                     include_dirs=include_dirs,
                     define_macros=macros,
+                    **parallelism_options
                 ))
 
     compiler_directives = {
