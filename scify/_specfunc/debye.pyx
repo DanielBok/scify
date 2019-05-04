@@ -224,7 +224,7 @@ cdef Result _debye_2(double x) nogil:
         res.val = c.val - x / 3.
         res.err = c.err + m.DBL_EPSILON * x / 3.
 
-    elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
+    elif x < - (m.M_LN2 + m.LOG_DBL_EPSILON):
         nexp = <int> cm.floor(X_CUT / x)
         ex = cm.exp(-x)
         total = 0.0
@@ -283,7 +283,7 @@ cdef Result _debye_3(double x) nogil:
         res.val = c.val - 0.375 * x
         res.err = c.err + m.DBL_EPSILON * 0.375 * x
 
-    elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
+    elif x < - (m.M_LN2 + m.LOG_DBL_EPSILON):
         nexp = <int>cm.floor(X_CUT / x)
         ex = cm.exp(-x)
         total = 0.0
@@ -343,7 +343,7 @@ cdef Result _debye_4(double x) nogil:
         res.val = c.val - 0.4 * x
         res.err = c.err + m.DBL_EPSILON * 0.4 * x
 
-    elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
+    elif x < - (m.M_LN2 + m.LOG_DBL_EPSILON):
         nexp = <int> cm.floor(X_CUT / x)
         ex = cm.exp(-x)
         total = 0.0
@@ -402,7 +402,7 @@ cdef Result _debye_5(double x) nogil:
         res.val = c.val - 5. * x / 12
         res.err = c.err + m.DBL_EPSILON * 5. * x / 12
 
-    elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
+    elif x < - (m.M_LN2 + m.LOG_DBL_EPSILON):
         nexp = <int> cm.floor(X_CUT / x)
         ex = cm.exp(-x)
         total = 0.0
@@ -461,7 +461,7 @@ cdef Result _debye_6(double x) nogil:
         res.val = c.val - 3. * x / 7
         res.err = c.err + m.DBL_EPSILON - 3. * x / 7
 
-    elif x < - (m.M_LN2 - m.LOG_DBL_EPSILON):
+    elif x < - (m.M_LN2 + m.LOG_DBL_EPSILON):
         nexp = <int> cm.floor(X_CUT / x)
         ex = cm.exp(-x)
         total = 0.0
